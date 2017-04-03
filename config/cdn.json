@@ -1,0 +1,51 @@
+{
+  "host": "//cdn.bootcss.com",
+  "prefix": "/{name}/{version}/",
+  "default": "{name}.{ext}",
+  "libraries": {
+    "normalize": "normalize.min.css",
+    "font-awesome": "css/font-awesome.min.css",
+    "animate.css": "animate.min.css",
+    "semantic-ui": {
+      "css": "semantic.min.css",
+      "js": "semantic.min.js"
+    },
+    "bootstrap": {
+      "css": "css/bootstrap.min.css",
+      "js": "js/bootstrap.min.js"
+    },
+    "hover.css": "css/hover-min.css",
+    "sweetalert": {
+      "css": "sweetalert.min.css",
+      "js": "sweetalert.min.js"
+    },
+    "jquery": "jquery.min.js",
+    "velocity": "velocity.min.js",
+    "zepto": "zepto.min.js",
+    "modernizr": "modernizr.min.js",
+    "codemirror": {
+      "css": ["codemirror.min.css", "theme/monokai.min.css"],
+      "js": ["codemirror.min.js", "addon/mode/multiplex.min.js", "mode/ebnf/ebnf.min.js"]
+    },
+    "select2": {
+      "css": "css/select2.min.js",
+      "js": ["js/select2.min.js", "js/i18n/zh-CN.js"]
+    },
+    "video.js": {
+      "css": "video-js.min.css",
+      "js": ["video.min.js", "lang/zh-CN.js"]
+    },
+    "rxjs": "Rx.min.js",
+    "i18next": "i18next.min.js",
+    "d3": "d3.min.js",
+    "three.js": "three.min.js",
+    "moment": "moment-with-locales.min.js",
+    "clipboard.js": "clipboard.min.js",
+    "require.js": "require.min.js",
+    "react": "react.min.js",
+    "react-router": "react-router.min.js",
+    "redux": "redux.min.js",
+    "vue": "vue.min.js",
+    "vuex": "vuex.min.js"
+  }
+}
