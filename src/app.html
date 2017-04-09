@@ -3,12 +3,25 @@
 <head>
   <meta charset="utf-8"/>
   <title>App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">
   <!-- inject external styles -->
   <link rel="stylesheet" type="text/css" href="/assets/app.bundle.css">
 </head>
 <body>
-  <p>Application</p>
+  <div class="container">
+    <div class="left-panel">
+      <div class="grammar-editor top-right-label" data-title="Grammar"></div>
+      <div class="input-editor top-right-label" data-title="Input"></div>
+    </div>
+    <div class="right-panel">
+      <div class="nfa-container top-right-label" data-title="NFA"></div>
+      <div class="dfa-container top-right-label" data-title="DFA"></div>
+    </div>
+  </div>
   <!-- inject external scripts -->
+  <script src="node_modules/codemirror/mode/ebnf/ebnf.js"></script>
+  <script src="node_modules/codemirror/addon/mode/multiplex.js"></script>
   <script type="text/javascript" src="/assets/app.bundle.js"></script>
 </body>
 </html>
