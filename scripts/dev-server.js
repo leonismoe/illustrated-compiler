@@ -6,6 +6,8 @@ const express = require('express');
 const webpack = require('webpack');
 const webpackMiddleware = require('webpack-dev-middleware');
 
+require('./object-polyfill');
+
 const transpiler = (() => {
   if (process.argv.includes('--no-transpiler')) {
     return '';
@@ -14,10 +16,10 @@ const transpiler = (() => {
   const offset = process.argv.indexOf('--transpiler');
   if (offset > -1) {
     switch (process.argv[offset]) {
-    case 'buble': result = 'buble'; break;
-    case 'babel': result = 'babel'; break;
-    case 'none':  result = ''; break;
-    default: process.stderr.write('transpiler is unspecified of unknown\n'); process.exit(-1);
+      case 'buble': result = 'buble'; break;
+      case 'babel': result = 'babel'; break;
+      case 'none':  result = ''; break;
+      default: process.stderr.write('transpiler is unspecified of unknown\n'); process.exit(-1);
     }
   }
   return result;

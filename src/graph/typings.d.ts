@@ -110,7 +110,8 @@ export declare class Graph extends Base {
   bfs(vertex: Vertex, callback: (currentValue: Vertex, previous: any) => any, initialValue?: any): any;
   dfs(vertex: Vertex, callback: (currentValue: Vertex, previous: any) => any, initialValue?: any): any;
 
-  toDOT(graph_name?: string): string;
+  toDOT(name?: string): string;
+  genDotAttrs(attrs: object): string;
 
 }
 

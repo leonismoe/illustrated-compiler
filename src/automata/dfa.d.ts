@@ -12,8 +12,8 @@ declare class DFA extends NFA {
   entry: Vertex;
 
   reset(): void;
-  next(ch: string): any;
-  toDOT(graph_name?: string): string;
+  next(val: string): any;
+  toDOT(name?: string): string;
 
   static from(object: NFA): DFA;
 

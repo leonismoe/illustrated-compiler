@@ -224,9 +224,9 @@ export default class Graph extends Base {
     return vertex.dfs(callback, initialValue);
   }
 
-  toDOT(graph_name = 'directed_graph') {
+  toDOT(name) {
     const instructions = [];
-    instructions.push(`digraph ${graph_name} {`);
+    instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
     instructions.push('  node [shape = circle];');
     instructions.push('  rankdir=LR;');
     this._edges.forEach(v => {
@@ -234,6 +234,16 @@ export default class Graph extends Base {
     });
     instructions.push('}');
     return instructions.join('\n');
+  }
+
+  genDotAttrs(attrs) {
+    const temp = [];
+    for (let k in attrs) {
+      if (attrs.hasOwnProperty(k)) {
+        temp.push(`${k}=${JSON.stringify(attrs[k])}`);
+      }
+    }
+    return temp.join(' ');
   }
 
 }
