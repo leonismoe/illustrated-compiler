@@ -9,6 +9,7 @@ const defaultOptions = {
   max_repeat_count: 8,
   max_repeat_group: 2,
   minimize_circle: false,
+  simplify_infinity_repeats: true,
 };
 
 const hexdigit = /[0-9a-fA-F]/;
@@ -177,9 +178,7 @@ export default class Regex2NFA {
         for (let j = i + 1; j < len; ++j) {
           const ch = regex[j];
           if (/\d/.test(ch)) {
-            if (range.length == 0) {
-              temp += ch;
-            }
+            temp += ch;
           } else if (ch == ',' && temp && range.length == 0) {
             range.push(temp | 0);
             temp = '';
@@ -360,6 +359,8 @@ export default class Regex2NFA {
     const nfa = new NFA({ epsilon: this.options.epsilon_symbol });
     const stack = [];
     const epsilon_edge_props = { accept: this.options.epsilon_symbol, label: this.options.epsilon_label };
+    const minimize_circle = this.options.minimize_circle;
+    const simplify_infinity_repeats = this.options.simplify_infinity_repeats;
 
     for (let token of tokens) {
       if (token.type == 'char' || token.type == 'range') {
@@ -393,12 +394,13 @@ export default class Regex2NFA {
         }
         const [ a, b ] = range;
         const { entry: original_entry, edges: original_edges, simple } = stack.pop();
+        const can_simplify_infinity_repeats = simplify_infinity_repeats && simple && b == Infinity;
         let entry = original_entry;
         let edges = [...original_edges];
         let last_entry = original_entry;
         let last_edges = edges;
 
-        if (a == 0) {
+        if (a == 0 && !can_simplify_infinity_repeats) {
           entry = nfa.addState();
           nfa.addEdge(entry, original_entry, epsilon_edge_props);
           edges = [ nfa.addEdge(entry, null, epsilon_edge_props) ];
@@ -409,7 +411,7 @@ export default class Regex2NFA {
           edges = [];
           const state_mapping = Object.create(null);
           const new_entry = nfa.addState();
-          state_mapping[original_entry.id] = new_entry.id;
+          state_mapping[original_entry.id] = new_entry;
           for (let edge of last_edges) {
             edge.to = new_entry;
           }
@@ -418,8 +420,7 @@ export default class Regex2NFA {
             const is_final_edge = original_edges.indexOf(edge) > -1;
             const id_to = is_final_edge ? null : edge.to.id;
             if (!is_final_edge && !state_mapping[id_to]) {
-              const new_state = nfa.addState();
-              state_mapping[id_to] = new_state.id;
+              state_mapping[id_to] = nfa.addState();
             }
             const begin = state_mapping[edge.from.id];
             const end = is_final_edge ? null : state_mapping[id_to];
@@ -438,7 +439,15 @@ export default class Regex2NFA {
           edges = edges.concat(original_edges);
 
         } else if (b == Infinity) {
-          if (a == 0) {
+          if (can_simplify_infinity_repeats) {
+            if (a > 0) {
+              last_entry = nfa.addState();
+              nfa.addEdge(last_entry, last_entry, edges[0].getProps());
+            }
+            edges[0].to = last_entry;
+            edges = [ nfa.addEdge(last_entry, null, epsilon_edge_props) ];
+
+          } else if (a == 0) {
             for (let edge of original_edges) {
               edge.to = entry;
             }
@@ -458,13 +467,12 @@ export default class Regex2NFA {
             preserved_edges = preserved_edges.concat(edges);
           }
 
-          const minimize_circle = this.options.minimize_circle;
           const cmp = a == 0 ? b - 1 : b - a;
           for (let i = 0; i < cmp; ++i) {
             edges = [];
             const state_mapping = Object.create(null);
             const new_entry = nfa.addState();
-            state_mapping[original_entry.id] = new_entry.id;
+            state_mapping[original_entry.id] = new_entry;
             for (let edge of last_edges) {
               edge.to = new_entry;
             }
@@ -473,8 +481,7 @@ export default class Regex2NFA {
               const is_final_edge = original_edges.indexOf(edge) > -1;
               const id_to = is_final_edge ? null : edge.to.id;
               if (!is_final_edge && !state_mapping[id_to]) {
-                const new_state = nfa.addState();
-                state_mapping[id_to] = new_state.id;
+                state_mapping[id_to] = nfa.addState();
               }
               const begin = state_mapping[edge.from.id];
               const end = is_final_edge ? null : state_mapping[id_to];
@@ -504,14 +511,14 @@ export default class Regex2NFA {
       }
     }
 
-    const final_state = nfa.addState({ label: this.options.final_state_symbol, terminal: true });
-    const entry_state = nfa.getState(0);
-    entry_state.set('label', this.options.initial_state_symbol);
-    nfa.set('entries', [entry_state]);
-
     if (stack.length != 1) {
       throw new Error('Unknown Error');
     }
+
+    const final_state = nfa.addState({ label: this.options.final_state_symbol, terminal: true });
+    const entry_state = stack[0].entry;
+    entry_state.set('label', this.options.initial_state_symbol);
+    nfa.set('entries', [entry_state]);
     for (let edge of stack[0].edges) {
       edge.to = final_state;
     }
@@ -582,8 +589,8 @@ export default class Regex2NFA {
           return new RegExp(str.slice(0, 2));
         }
 
-      default:
-        return ch;
+      default: // eslint-disable-line no-fallthrough
+        return str[1];
     }
   }
 

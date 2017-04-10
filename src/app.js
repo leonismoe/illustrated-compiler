@@ -8,11 +8,14 @@ import RLG2NFA from './automata/rlg-to-nfa';
 import CodeMirror from 'codemirror';
 import Viz from 'viz.js';
 
-window.NFA = NFA;
-window.DFA = DFA;
-window.RLG2NFA = RLG2NFA;
-window.Regex2NFA = Regex2NFA;
 
+const initial_text = `# a+b*
+S -> aS | aC
+C -> b | bC | ε
+
+#S -> aA | bB
+#B -> aA | b
+#A -> bbB | ε`;
 
 CodeMirror.defineMode('nearley', function(config) {
   return CodeMirror.multiplexingMode(
@@ -28,14 +31,7 @@ CodeMirror.defineMode('nearley', function(config) {
 
 const cm = CodeMirror(document.querySelector('.grammar-editor'), {
   mode: 'nearley',
-  value: `# a+b*
-S -> aS | aC
-C -> b | bC | ε
-
-#S -> aA | bB
-#B -> aA | b
-#A -> bbB | ε
-`,
+  value: initial_text,
   lineNumbers: true,
   // lineWrapping: true,
   indentWithTabs: false,
@@ -55,8 +51,8 @@ function onchange(instance, changes) {
   if (updating) return;
   updating = true;
   if (errorMarker) errorMarker.clear();
-  const text = instance.getValue();
-  if (!text.trim()) {
+  const text = instance.getValue().trim();
+  if (!text) {
     updating = false;
     return;
   }
@@ -85,6 +81,7 @@ function onchange(instance, changes) {
     // errorMarker = cm.markText({ line: line, ch: col }, { line: line, ch: col + 1 }, {
     //   className: 'error-loc'
     // });
+  } finally {
+    updating = false;
   }
-  updating = false;
 }

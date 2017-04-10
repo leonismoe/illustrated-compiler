@@ -9,7 +9,7 @@ declare class NFA extends Graph {
 
   isTerminal(vertex: Vertex): boolean;
   minimize(): void;
-  toDOT(graph_name?: string): string;
+  toDOT(name?: string): string;
 
   addState(): Vertex;
   addState(state: Vertex): Vertex;

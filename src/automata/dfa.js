@@ -49,21 +49,82 @@ export default class DFA extends NFA {
     this._state = this.get('entry');
   }
 
-  next(ch) {
-    ;
+  next(val) {
+    if (!this._state) {
+      this._done = true;
+      return { state: null, done: true, error: 'Unknown state' };
+    }
+    if (this._done) {
+      return { state: this._state, done: true, error: 'This state machine has finished matching' };
+    }
+    const moves = this._state.out;
+    let transition = null;
+    for (let edge of moves) {
+      const accept = edge.get('accept');
+      if (typeof accept == 'function') {
+        if (accept(val)) {
+          transition = edge;
+          break;
+        }
+      } else if (accept instanceof RegExp) {
+        if (accept.test(val)) {
+          transition = edge;
+          break;
+        }
+      } else if (accept === val || accept === '') {
+        transition = edge;
+        break;
+      }
+    }
+    if (!transition) {
+      this._done = true;
+      if (this._state.get('terminal')) {
+        return { state: this._state, done: true, error: '' };
+      }
+      return { state: this._state, done: true, error: 'No available transitions' };
+    }
+    this._matches.push(val);
+    this._state  = transition.to;
+    const greedy = this._state.get('greedy', this._props.greedy);
+    this._done   = greedy ? false : !!this._state.get('terminal');
+    return { state: this._state, done: this._done, error: '' };
   }
 
-  toDOT(graph_name = 'dfa') {
+  toDOT(name) {
+    const nfa = this.get('nfa');
     const instructions = [];
-    instructions.push(`digraph ${graph_name} {`);
+    instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
     if (this._terminals.length) {
       instructions.push('  node [shape = doublecircle]; ' + this._terminals.map(v => v.labelOrId).join(' ') + ';');
     }
     instructions.push('  node [shape = circle];');
     instructions.push('  rankdir=LR;');
-    this._edges.forEach(v => {
-      instructions.push(`  ${v.from && v.from.labelOrId} -> ${v.to && v.to.labelOrId} [ label = "${v.labelOrId}" ];`);
-    });
+    for (let vertex of this._vertices) {
+      const attrs = {
+        id: 's' + vertex.id,
+        label: vertex.labelOrId,
+      };
+      if (vertex.isset('tooltip')) {
+        attrs.tooltip = vertex.get('tooltip');
+      } else if (nfa && vertex.isset('nfa-mapping')) {
+        attrs.tooltip = vertex.get('nfa-mapping').map(v => nfa.getVertexById(v).labelOrId).join(', ');
+      }
+      instructions.push(`  ${vertex.id} [${this.genDotAttrs(attrs)}];`);
+    }
+    for (let edge of this._edges) {
+      const attrs = {
+        id: 'e' + edge.id,
+        label: edge.labelOrId,
+      };
+      if (edge.isset('tooltip')) {
+        attrs.tooltip = edge.get('tooltip');
+      }
+      instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
+    }
+    if (this.entry) {
+      instructions.push('  _invis [shape=none label="" fixedsize=true width=0 height=0];');
+      instructions.push(`  _invis -> ${this.entry.labelOrId};`);
+    }
     instructions.push('}');
     return instructions.join('\n');
   }

@@ -17,8 +17,9 @@ export default function NFA2DFA(object) {
   const nfa_states = [ epsilon_closure(object.entries, epsilon_symbol) ];
 
   const dfa = new DFA();
-  const entry = dfa.addVertex({ detail: map_to_id(nfa_states[0]), terminal: contain_terminal(terminals, nfa_states[0]) });
+  const entry = dfa.addVertex({ 'nfa-mapping': map_to_id(nfa_states[0]), terminal: contain_terminal(terminals, nfa_states[0]) });
   dfa.set('entry', entry);
+  dfa.set('nfa', object);
   const states = [entry];
 
   for (let i = 0; i < nfa_states.length; ++i) {
@@ -30,7 +31,7 @@ export default function NFA2DFA(object) {
       if (index < 0) {
         index = nfa_states.length;
         nfa_states.push(new_state);
-        states.push(dfa.addVertex({ detail: map_to_id(new_state), terminal: contain_terminal(terminals, new_state) }));
+        states.push(dfa.addVertex({ 'nfa-mapping': map_to_id(new_state), terminal: contain_terminal(terminals, new_state) }));
       }
       dfa.addEdge(states[i], states[index], { accept, label: accept.source || accept });
     }

@@ -88,68 +88,55 @@ export default class NFA extends Graph {
     }
   }
 
-  toDOT(graph_name = 'nfa') {
+  toDOT(name) {
     const terminals = this.terminals;
     const instructions = [];
-    instructions.push(`digraph ${graph_name} {`);
+    instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
     if (terminals.length) {
-      instructions.push('  node [shape = doublecircle]; ' + terminals.map(v => v.labelOrId).join(' ') + ';');
+      instructions.push('  node [shape=doublecircle]; ' + terminals.map(v => v.id).join(' ') + ';');
     }
-    instructions.push('  node [shape = circle];');
+    instructions.push('  node [shape=circle];');
     instructions.push('  rankdir=LR;');
-    this._edges.forEach(v => {
-      const label = v.label || (v.get('match') == this._props.epsilon ? 'ε' : v.id);
-      instructions.push(`  ${v.from && v.from.labelOrId} -> ${v.to && v.to.labelOrId} [ label = "${label}" ];`);
-    });
+    for (let vertex of this._vertices) {
+      const attrs = {
+        id: 's' + vertex.id,
+        label: vertex.labelOrId,
+      };
+      if (vertex.isset('tooltip')) {
+        attrs.tooltip = vertex.get('tooltip');
+      }
+      instructions.push(`  ${vertex.id} [${this.genDotAttrs(attrs)}];`);
+    }
+    for (let edge of this._edges) {
+      const attrs = {
+        id: 'e' + edge.id,
+        label: edge.label || (edge.get('match') == this._props.epsilon ? 'ε' : edge.id),
+      };
+      if (edge.isset('tooltip')) {
+        attrs.tooltip = edge.get('tooltip');
+      }
+      instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
+    }
+    instructions.push('  node [shape=none label="" fixedsize=true width=0 height=0];');
+    const entries = this._props.entries;
+    for (let i = 0, size = entries.length; i < size; ++i) {
+      instructions.push(`  _invis${i} -> ${entries[i].id};`);
+    }
     instructions.push('}');
     return instructions.join('\n');
   }
 
-
-  // ==========================================================================
-  // Alias
-  // ==========================================================================
-
-  // addState(vertex : Vertex)
-  // addState(id)
-  // addState(props)
-  // addState(id, props)
-  // addState()
-  addState() {
-    return this.addVertex.apply(this, arguments);
-  }
-
-  getState(id) {
-    return this.getVertexById(id);
-  }
-
-  removeState(state) {
-    return this.removeVertex(state);
-  }
-
-  removeStateById(id) {
-    return this.removeVertexById(id);
-  }
-
-  // addTransition(edge : Edge)
-  // addTransition(from, to)
-  // addTransition(id, from, to)
-  // addTransition(from, to, props)
-  // addTransition(id, from, to, props)
-  addTransition() {
-    return this.addEdge.apply(this, arguments);
-  }
-
-  getTransition(id) {
-    return this.getEdgeById(id);
-  }
-
-  removeTransition(trans) {
-    return this.removeEdge(trans);
-  }
-
-  removeTransitionById(id) {
-    return this.removeEdgeById(id);
-  }
-
 }
+
+const GraphProto = Graph.prototype;
+Object.assign(NFA.prototype, {
+  addState:             GraphProto.addVertex,
+  getState:             GraphProto.getVertexById,
+  removeState:          GraphProto.removeVertex,
+  removeStateById:      GraphProto.removeVertexById,
+
+  addTransition:        GraphProto.addVertex,
+  getTransition:        GraphProto.getEdgeById,
+  removeTransition:     GraphProto.removeEdge,
+  removeTransitionById: GraphProto.removeEdgeById,
+});
