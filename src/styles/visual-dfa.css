@@ -1,0 +1,59 @@
+:root {
+  --sm-highlight-color: #ff8a27;
+  --sm-node-anim-duration: 0.4s;
+  --sm-path-anim-duration: 0.8s;
+  --sm-path-anim-easing: cubic-bezier(0.5, 1, 0.5, 0);
+}
+
+.graph text {
+  font-family: 'PT Sans', 'Microsoft YaHei UI', sans-serif;
+}
+.graph .node text {
+  font-size: 16;
+  font-weight: bold;
+}
+
+.graph .node.animate {
+  & ellipse,
+  & text {
+    transition: all var(--sm-node-anim-duration);
+  }
+}
+
+.use-arrow .edge path {
+  marker-end: url(#arrow-tail);
+}
+
+.graph path.animate {
+  stroke: var(--sm-highlight-color);
+  stroke-width: 3;
+  transition: stroke-dashoffset var(--sm-path-anim-duration) var(--sm-path-anim-easing);
+}
+
+.graph .node ellipse {
+  fill: transparent;
+}
+
+.graph .node.highlight {
+
+  /**
+   * can't specify class name in DOT
+   * https://github.com/ellson/graphviz/blob/3e6b92b1d24a6deb478140f2e1410bc98e6b4d9f/plugin/core/gvrender_core_svg.c#L302
+   */
+  & ellipse:first-child {
+    fill: var(--sm-highlight-color);
+  }
+
+  & ellipse {
+    stroke: var(--sm-highlight-color);
+
+    &:last-of-type {
+      stroke-width: 2;
+    }
+  }
+
+  & text {
+    fill: #fff;
+  }
+
+}

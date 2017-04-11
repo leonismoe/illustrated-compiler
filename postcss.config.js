@@ -15,7 +15,7 @@ module.exports = (ctx) => ({
         if (first_part.startsWith('~')) {
           first_part = first_part.slice(1);
         }
-        if (externals[first_part]) {
+        if (first_part in externals) {
           webpackIntegration.add(id);
           return stub;
         }
