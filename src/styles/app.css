@@ -1,4 +1,5 @@
 @import "normalize.css";
+@import "./visual-dfa.css";
 
 * {
   box-sizing: border-box;

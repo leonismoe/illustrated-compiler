@@ -4,6 +4,7 @@ import NFA from './automata/nfa';
 import DFA from './automata/dfa';
 import Regex2NFA from './automata/regex-to-nfa';
 import RLG2NFA from './automata/rlg-to-nfa';
+import VisualDFA from './automata/visual-dfa';
 
 import CodeMirror from 'codemirror';
 import Viz from 'viz.js';
@@ -62,8 +63,10 @@ function onchange(instance, changes) {
     document.querySelector('.nfa-container').innerHTML = Viz(nfa_dot);
 
     const dfa = DFA.from(nfa);
-    let dfa_dot = dfa.toDOT('dfa_graph');
+    let dfa_dot = dfa.toDOT('dfa_graph', true);
     document.querySelector('.dfa-container').innerHTML = Viz(dfa_dot);
+    // debug
+    window.visualdfa = new VisualDFA(dfa, '.dfa-container');
   } catch (e) {
     throw e;
     // if (e.message.startsWith('nearley')) {

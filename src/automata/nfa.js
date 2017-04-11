@@ -88,7 +88,7 @@ export default class NFA extends Graph {
     }
   }
 
-  toDOT(name) {
+  toDOT(name, noarrow) {
     const terminals = this.terminals;
     const instructions = [];
     instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
@@ -115,12 +115,15 @@ export default class NFA extends Graph {
       if (edge.isset('tooltip')) {
         attrs.tooltip = edge.get('tooltip');
       }
+      if (noarrow) {
+        attrs.dir = 'none';
+      }
       instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
     }
     instructions.push('  node [shape=none label="" fixedsize=true width=0 height=0];');
     const entries = this._props.entries;
     for (let i = 0, size = entries.length; i < size; ++i) {
-      instructions.push(`  _invis${i} -> ${entries[i].id};`);
+      instructions.push(`  _invis${i} -> ${entries[i].id}${noarrow ? '[dir="none"]' : ''};`);
     }
     instructions.push('}');
     return instructions.join('\n');

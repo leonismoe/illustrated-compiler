@@ -13,7 +13,7 @@ declare class DFA extends NFA {
 
   reset(): void;
   next(val: string): any;
-  toDOT(name?: string): string;
+  toDOT(name?: string, noarrow?: boolean): string;
 
   static from(object: NFA): DFA;
 

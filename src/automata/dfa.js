@@ -52,10 +52,10 @@ export default class DFA extends NFA {
   next(val) {
     if (!this._state) {
       this._done = true;
-      return { state: null, done: true, error: 'Unknown state' };
+      return { state: null, edge: null, done: true, error: 'Unknown state' };
     }
     if (this._done) {
-      return { state: this._state, done: true, error: 'This state machine has finished matching' };
+      return { state: this._state, edge: null, done: true, error: 'This state machine has finished matching' };
     }
     const moves = this._state.out;
     let transition = null;
@@ -79,25 +79,25 @@ export default class DFA extends NFA {
     if (!transition) {
       this._done = true;
       if (this._state.get('terminal')) {
-        return { state: this._state, done: true, error: '' };
+        return { state: this._state, edge: null, done: true, error: '' };
       }
-      return { state: this._state, done: true, error: 'No available transitions' };
+      return { state: this._state, edge: null, done: true, error: 'No available transitions' };
     }
     this._matches.push(val);
     this._state  = transition.to;
     const greedy = this._state.get('greedy', this._props.greedy);
     this._done   = greedy ? false : !!this._state.get('terminal');
-    return { state: this._state, done: this._done, error: '' };
+    return { state: this._state, edge: transition, done: this._done, error: '' };
   }
 
-  toDOT(name) {
+  toDOT(name, noarrow) {
     const nfa = this.get('nfa');
     const instructions = [];
     instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
     if (this._terminals.length) {
-      instructions.push('  node [shape = doublecircle]; ' + this._terminals.map(v => v.labelOrId).join(' ') + ';');
+      instructions.push('  node [shape=doublecircle]; ' + this._terminals.map(v => v.id).join(' ') + ';');
     }
-    instructions.push('  node [shape = circle];');
+    instructions.push('  node [shape=circle];');
     instructions.push('  rankdir=LR;');
     for (let vertex of this._vertices) {
       const attrs = {
@@ -119,11 +119,14 @@ export default class DFA extends NFA {
       if (edge.isset('tooltip')) {
         attrs.tooltip = edge.get('tooltip');
       }
+      if (noarrow) {
+        attrs.dir = 'none';
+      }
       instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
     }
     if (this.entry) {
       instructions.push('  _invis [shape=none label="" fixedsize=true width=0 height=0];');
-      instructions.push(`  _invis -> ${this.entry.labelOrId};`);
+      instructions.push(`  _invis -> ${this.entry.id}${noarrow ? '[dir="none"]' : ''};`);
     }
     instructions.push('}');
     return instructions.join('\n');
