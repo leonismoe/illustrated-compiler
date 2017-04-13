@@ -6,6 +6,7 @@ import Regex2NFA from './automata/regex-to-nfa';
 import RLG2NFA from './automata/rlg-to-nfa';
 import VisualDFA from './automata/visual-dfa';
 
+import debounce from 'lodash/debounce';
 import CodeMirror from 'codemirror';
 import Viz from 'viz.js';
 
@@ -45,7 +46,7 @@ cm.setSize(null, '100%');
 
 let updating;
 let errorMarker;
-cm.on('changes', onchange);
+cm.on('changes', debounce(onchange, 200));
 onchange(cm);
 
 function onchange(instance, changes) {
@@ -58,7 +59,7 @@ function onchange(instance, changes) {
     return;
   }
   try {
-    const nfa = RLG2NFA.transform(text);
+    const nfa = Regex2NFA.transform(text);
     const nfa_dot = nfa.toDOT('nfa_graph');
     document.querySelector('.nfa-container').innerHTML = Viz(nfa_dot);
 

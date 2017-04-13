@@ -1,0 +1,23 @@
+.error-loc {
+  position: relative;
+
+  &::before {
+    position: absolute;
+    content: '^';
+    display: inline-block;
+    bottom: -0.6em;
+    left: -0.2em;
+    /*background-color: #fff; */
+    color: #c80000;
+    font-size: 1em;
+    font-weight: 500;
+    border-radius: 50%;
+    animation: pulse 1s infinite;
+  }
+}
+
+@keyframes pulse {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}

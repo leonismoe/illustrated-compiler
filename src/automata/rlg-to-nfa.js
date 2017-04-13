@@ -8,21 +8,12 @@ const defaultOptions = {
   final_state_name: 'END',
   only_one_terminal: true,
   initial_nonterminal: null,
-  nonterminals: /[A-Z]/,
 };
 
 export default class RLG2NFA {
 
   constructor(options) {
     this.options = Object.assign({}, defaultOptions, options);
-
-    if (Array.isArray(this.options.nonterminals)) {
-      this.isNonterminal = (ch) => this.options.nonterminals.indexOf(ch) > -1;
-    } else if (typeof this.options.nonterminals == 'function') {
-      this.isNonterminal = this.options.nonterminals;
-    } else if (this.options.nonterminals instanceof RegExp) {
-      this.isNonterminal = (ch) => this.options.nonterminals.test(ch);
-    }
   }
 
   static transform(text, options) {

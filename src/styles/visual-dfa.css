@@ -7,6 +7,12 @@
 
 .graph text {
   font-family: 'PT Sans', 'Microsoft YaHei UI', sans-serif;
+  user-select: none;
+  cursor: default;
+
+  &::selection {
+    background-color: transparent;
+  }
 }
 .graph .node text {
   font-size: 16;

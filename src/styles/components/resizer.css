@@ -1,0 +1,58 @@
+.resizer {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+  }
+
+  &.sticky::before,
+  &:focus::before,
+  &:hover::before {
+    background-color: #2684ff;
+  }
+
+  @nest .resizer-wrapper.vertical > &,
+  &.vertical {
+    height: 100%;
+    width: 8px;
+    left: -4px;
+    cursor: ew-resize;
+
+    &::before {
+      width: 2px;
+      height: 100%;
+      left: 3px;
+      top: 0;
+    }
+  }
+
+  @nest .resizer-wrapper.horizontal > &,
+  &.horizontal {
+    width: 100%;
+    height: 8px;
+    top: -4px;
+    cursor: ns-resize;
+
+    &::before {
+      width: 100%;
+      height: 2px;
+      top: 3px;
+      left: 0;
+    }
+  }
+}
+
+.resizer-wrapper {
+  overflow: visible;
+
+  &.vertical {
+    width: 0;
+    height: 100%;
+  }
+
+  &.horizontal {
+    width: 100%;
+    height: 0;
+  }
+}

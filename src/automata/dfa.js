@@ -59,21 +59,23 @@ export default class DFA extends NFA {
     }
     const moves = this._state.out;
     let transition = null;
-    for (let edge of moves) {
-      const accept = edge.get('accept');
-      if (typeof accept == 'function') {
-        if (accept(val)) {
+    if (val !== null && val !== undefined) {
+      for (let edge of moves) {
+        const accept = edge.get('accept');
+        if (typeof accept == 'function') {
+          if (accept(val)) {
+            transition = edge;
+            break;
+          }
+        } else if (accept instanceof RegExp) {
+          if (accept.test(val)) {
+            transition = edge;
+            break;
+          }
+        } else if (accept === val || accept === '') {
           transition = edge;
           break;
         }
-      } else if (accept instanceof RegExp) {
-        if (accept.test(val)) {
-          transition = edge;
-          break;
-        }
-      } else if (accept === val || accept === '') {
-        transition = edge;
-        break;
       }
     }
     if (!transition) {
@@ -88,6 +90,36 @@ export default class DFA extends NFA {
     const greedy = this._state.get('greedy', this._props.greedy);
     this._done   = greedy ? false : !!this._state.get('terminal');
     return { state: this._state, edge: transition, done: this._done, error: '' };
+  }
+
+  match(str, fullmatch) {
+    // TODO:
+  }
+
+  test(str, fullmatch) {
+    if (typeof str != 'string') {
+      if (str === null || str === undefined) return false;
+      str += '';
+    }
+    let last_test = null;
+    if (fullmatch) {
+      this.reset();
+      for (let i = 0, size = str.length; i <= size; ++i) {
+        last_test = this.next(str[i]);
+        if (last_test.done) break;
+      }
+    } else {
+      outer:
+      for (let i = 0, size = str.length; i < size; ++i) {
+        this.reset();
+        for (let j = i; j <= size; ++j) {
+          last_test = this.next(str[j]);
+          if (last_test.error) break;
+          if (last_test.done)  break outer;
+        }
+      }
+    }
+    return last_test.done && !last_test.error;
   }
 
   toDOT(name, noarrow) {

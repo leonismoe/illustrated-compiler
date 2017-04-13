@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const NormalModule = require('webpack/lib/NormalModule');
 const externals = require('../externals').getExternals();
 const postcssIntegration = require('../postcss/imported');
 
@@ -14,6 +15,15 @@ ExternalsPlugin.prototype.apply = function(compiler) {
   compiler.plugin('emit', (compilation, callback) => {
     const map = require('../externals').getResourceMap();
     const webpackFS = compilation.compiler.outputFileSystem;
+
+    for (let k in compilation.entrypoints) {
+      if (!compilation.entrypoints.hasOwnProperty(k)) continue;
+      const entrypoint = compilation.entrypoints[k];
+      for (let chunk of entrypoint.chunks) {
+        ;
+      }
+
+    }
 
     const imported_styles = [];
     const extra_styles = [];
@@ -30,16 +40,18 @@ ExternalsPlugin.prototype.apply = function(compiler) {
       }
     });
 
-    // const externals_modules = [];
-    // for (let module of compilation.modules) {
-    //   if (/^\w/.test(module.rawRequest) && !module.issuer.context.includes('node_modules')) {
-    //     const parts = module.rawRequest.split('/');
-    //     const id = parts[0];
-    //     if (externals[id]) {
-    //       externals_modules.push(module.rawRequest);
-    //     }
-    //   }
-    // }
+    const externals_modules = [];
+    for (let module of compilation.modules) {
+      if (module.rawRequest && /^\w/.test(module.rawRequest) && !module.issuer.context.includes('node_modules')) {
+        const parts = module.rawRequest.split('/');
+        const id = parts[0];
+        if (externals[id]) {
+          externals_modules.push(module.rawRequest);
+        }
+      }
+    }
+    debugger;
+    console.log(externals_modules);
     const imported_modules = Object.keys(externals);
     const extra_scripts = [];
     // console.log(compilation.options);

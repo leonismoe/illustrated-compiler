@@ -14,6 +14,7 @@ module.exports = {
   context: path.resolve(__dirname, '../../src'),
   entry: {
     app: './app.js',
+    'visual-rlg': './visual-rlg.js',
   },
   externals,
   module: {

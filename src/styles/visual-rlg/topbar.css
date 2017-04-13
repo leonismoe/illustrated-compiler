@@ -1,0 +1,48 @@
+.topbar {
+  width: 100%;
+  color: #fff;
+  background-color: #000;
+
+  &,
+  & > .container {
+    height: 36px;
+    line-height: 36px;
+  }
+}
+
+.topbar-menu {
+  margin: 0;
+  padding: 0;
+  font-size: 0;
+
+  & > .item {
+    font-size: 1rem;
+    position: relative;
+    display: inline-block;
+    padding-left: 0.95em;
+    padding-right: 0.95em;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background-image: linear-gradient(rgba(255,255,255,0.1) 0,rgba(255,255,255,0.24) 50%,rgba(255,255,255,0.1) 100%);
+    }
+  }
+
+  & > a.item {
+    height: 100%;
+
+    &:hover {
+      background-color: color(#000 lightness(10%));
+    }
+  }
+
+  &.right > .item::before {
+    left: 0;
+    right: auto;
+  }
+}
