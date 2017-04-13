@@ -1,0 +1,64 @@
+@import "../common/global.css";
+@import "../components/resizer.css";
+@import "../editor/codemirror.css";
+@import "../editor/error-marker.css";
+@import "./topbar.css";
+
+body,
+.page-layout {
+  height: 100%;
+}
+
+.page-layout {
+  position: relative;
+  padding-top: 36px;
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+}
+
+.footer {
+  width: 100%;
+  height: 42px;
+  line-height: 42px;
+  position: fixed;
+  bottom: 0;
+  background-color: #000;
+  color: #fff;
+}
+
+.main-frame {
+  height: 100%;
+  display: flex;
+  padding-bottom: 42px;
+}
+
+.panel-left {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(212, 59, 127, 0.3);
+}
+
+.panel-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(51, 122, 227, 0.3);
+}
+
+.editor-grammar {
+  height: 50%;
+}
+.editor-input {
+  flex: 1;
+}
+
+.graph-nfa {
+  height: 50%;
+}
+.graph-dfa {
+  flex: 1;
+}

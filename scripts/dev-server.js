@@ -31,6 +31,7 @@ const app = express();
 app.use(express.static(path.resolve(__dirname, '../public')));
 app.use('/node_modules', express.static(path.resolve(__dirname, '../node_modules')));
 app.use(webpackMiddleware(compiler));
+app.use(express.static(path.resolve(__dirname, '../src')));
 
 app.listen(3000);
 process.stderr.write('Listening at http://localhost:3000/\n');

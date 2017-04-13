@@ -175,6 +175,7 @@ export default class Regex2NFA {
       } else if (ch == '{') {
         let range = [];
         let temp = '';
+        let closed = false;
         for (let j = i + 1; j < len; ++j) {
           const ch = regex[j];
           if (/\d/.test(ch)) {
@@ -188,6 +189,7 @@ export default class Regex2NFA {
             } else if (range.length == 1) {
               range.push(Infinity);
             }
+            closed = true;
             break;
           } else {
             break;
@@ -198,7 +200,7 @@ export default class Regex2NFA {
           if (range[0] > range[1]) {
             throw new ParseError('Numbers out of order in {} quantifier', 0, i + 2 + ('' + range[0]).length);
           }
-        } else if (range.length != 1) {
+        } else if (range.length != 1 || !closed) {
           range = null;
         }
 

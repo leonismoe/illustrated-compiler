@@ -101,12 +101,6 @@ html, body {
   transform: translate(50%, -100%) rotate(45deg);
 }
 
-.nfa-container text,
-.dfa-container text {
-  cursor: default;
-  user-select: none;
-}
-
 .error-loc {
   position: relative;
 }
