@@ -2,7 +2,6 @@ import '../styles/visual-rlg/index.css';
 
 import debounce from 'lodash/debounce';
 import ace from 'ace-builds/src-noconflict/ace';
-import updateRLGSymbol from './visual-rlg/ace-rlg-syntax';
 
 import DFA from '../automata/dfa';
 import RLG2NFA from '../automata/rlg-to-nfa';
@@ -11,6 +10,9 @@ import VisualDFA from '../automata/visual-dfa';
 import VizFactory from '../components/viz-factory';
 import Resizer from '../components/resizer';
 // import DragScroll from '../components/dragscroll';
+
+import updateRLGSymbol from './visual-rlg/ace-rlg-syntax';
+import TextMarker from './visual-rlg/text-marker';
 
 const initial_text = `# a+b*
 S -> aS | aC
@@ -32,7 +34,7 @@ editorRLG.setValue(initial_text, 1);
 editorRLG.setHighlightActiveLine(false);
 editorRLG.setHighlightGutterLine(false);
 editorRLG.renderer.$cursorLayer.element.style.display = 'none';
-editorRLG.getSession().on('change', debounce(onchange, 300));
+editorRLG.getSession().on('change', debounce(onchange, 500));
 editorRLG.on('focus', () => {
   editorRLG.renderer.$cursorLayer.element.style.display = 'block';
   editorRLG.setHighlightGutterLine(true);
@@ -43,7 +45,9 @@ editorRLG.on('blur', () => {
 });
 
 const $text = document.getElementById('editor-text');
-;
+// debug
+window.marker = new TextMarker('.editor-text .marker', '18px/1 "Source Code Pro", consolas, monospace, "Microsoft YaHei UI", sans-serif');
+
 
 const resizeEditor = () => {
   editorRLG.resize();
@@ -60,8 +64,7 @@ const VizNFA = VizFactory.create();
 const VizDFA = VizFactory.create();
 const $nfa = document.querySelector('.graph-nfa');
 const $dfa = document.querySelector('.graph-dfa');
-const $nfa_overlay = $nfa.nextElementSibling;
-const $dfa_overlay = $dfa.nextElementSibling;
+const $graph_overlay = document.querySelector('.graph-overlay');
 
 let updating;
 onchange();
@@ -74,10 +77,8 @@ function onchange(e) {
     return;
   }
   try {
-    $nfa_overlay.classList.remove('js-error');
-    $nfa_overlay.classList.add('js-loading');
-    $dfa_overlay.classList.remove('js-error');
-    $dfa_overlay.classList.add('js-loading');
+    $graph_overlay.classList.remove('js-error');
+    $graph_overlay.classList.add('js-loading');
 
     const nfa = RLG2NFA.transform(text, options);
     const nfa_dot = nfa.toDOT('NFA', true);
@@ -85,33 +86,23 @@ function onchange(e) {
     const dfa = DFA.from(nfa);
     let dfa_dot = dfa.toDOT('DFA', true);
 
-    VizNFA(nfa_dot).then((svg) => {
-      $nfa_overlay.classList.remove('js-loading');
-      $nfa.innerHTML = svg.slice(svg.indexOf('-->', 57) + 3); // remove <?xml...
-    }).catch((e) => {
-      $nfa_overlay.classList.remove('js-loading');
-      $nfa_overlay.classList.add('js-error');
-      $nfa_overlay.querySelector('.error-tip').innerText = e.message || 'An error occurred while processing the graph.';
-    });
-
-    VizDFA(dfa_dot).then((svg) => {
-      $dfa_overlay.classList.remove('js-loading');
-      $dfa.innerHTML = svg.slice(svg.indexOf('-->', 57) + 3); // remove <?xml...
-
-      // debug
+    Promise.all([
+      VizNFA(nfa_dot),
+      VizDFA(dfa_dot),
+    ]).then(([svg_nfa, svg_dfa]) => {
+      $graph_overlay.classList.remove('js-loading');
+      $nfa.innerHTML = svg_nfa.slice(svg_nfa.indexOf('-->', 57) + 3); // remove <?xml...
+      $dfa.innerHTML = svg_dfa.slice(svg_dfa.indexOf('-->', 57) + 3); // remove <?xml...
       window.visualdfa = new VisualDFA(dfa, $dfa);
     }).catch((e) => {
-      $dfa_overlay.classList.remove('js-loading');
-      $dfa_overlay.classList.add('js-error');
-      $dfa_overlay.querySelector('.error-tip').innerText = e.message || 'An error occurred while processing the graph.';
+      $graph_overlay.classList.remove('js-loading');
+      $graph_overlay.classList.add('js-error');
+      $graph_overlay.querySelector('.error-tip').innerText = e.message || 'An error occurred while processing the graph.';
     });
   } catch (e) {
-    $nfa_overlay.classList.remove('js-loading');
-    $dfa_overlay.classList.remove('js-loading');
-    $nfa_overlay.classList.add('js-error');
-    $dfa_overlay.classList.add('js-error');
-    $nfa_overlay.querySelector('.error-tip').innerText = e.message;
-    $dfa_overlay.querySelector('.error-tip').innerText = e.message;
+    $graph_overlay.classList.remove('js-loading');
+    $graph_overlay.classList.add('js-error');
+    $graph_overlay.querySelector('.error-tip').innerText = e.message;
     throw e;
   } finally {
     updating = false;

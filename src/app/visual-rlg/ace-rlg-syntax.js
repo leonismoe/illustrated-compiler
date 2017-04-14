@@ -18,12 +18,8 @@ const Rules = {
       regex: /\|/,
     },
     {
-      token: 'keyword.operator.assignment',
-      regex: /=>|->|::=/,
-    },
-    {
-      token: 'constant.identifier',
-      regex: /^\s*<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*'*>?/
+      token: ['constant.identifier', 'keyword.operator.assignment'],
+      regex: /^(\s*<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*'*>?\s*)(=>|->|::=)/,
     },
   ],
 };

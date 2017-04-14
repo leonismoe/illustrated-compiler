@@ -16,3 +16,7 @@ html {
 body {
   min-height: 100%;
 }
+
+::selection {
+  background-color: #cce2ff;
+}
