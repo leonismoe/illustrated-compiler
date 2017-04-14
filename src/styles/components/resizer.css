@@ -1,11 +1,13 @@
 .resizer {
   position: relative;
+  z-index: 400;
 
   &::before {
     content: '';
     position: absolute;
   }
 
+  &.active::before,
   &.sticky::before,
   &:focus::before,
   &:hover::before {

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Visual RLG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- inject external styles -->
+  <link rel="stylesheet" type="text/css" href="/assets/visual-rlg.bundle.css">
+</head>
+<body>
+  <div class="page-layout">
+    <div class="topbar">
+      <div class="container">
+        <div class="topbar-menu">
+          <div class="item"><strong>Illustrated Compiler</strong></div>
+          <div class="item"><strong>Visual RLG</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-frame">
+      <div class="panel-left">
+        <div class="section section-grammar">
+          <div class="section-title">Grammar</div>
+          <div class="section-body editor-grammar" id="editor-grammar"></div>
+        </div>
+        <div class="resizer-wrapper horizontal"><div class="resizer"></div></div>
+        <div class="section section-text">
+          <div class="section-title">Text</div>
+          <div class="section-body editor-text" id="editor-text">
+            <input type="text" class="editor-text-input" id="editor-text-input" value="" />
+          </div>
+        </div>
+      </div>
+
+      <div class="resizer-wrapper vertical panel-resizer"><div class="resizer"></div></div>
+
+      <div class="panel-right">
+        <div class="section section-nfa">
+          <div class="section-title">NFA</div>
+          <div class="section-body graph-nfa use-arrow"></div>
+          <div class="section-overlay animate js-loading">
+            <div class="loader"></div>
+            <div class="error-tip"></div>
+          </div>
+        </div>
+        <div class="resizer-wrapper horizontal"><div class="resizer"></div></div>
+        <div class="section section-dfa">
+          <div class="section-title">DFA</div>
+          <div class="section-body graph-dfa use-arrow"></div>
+          <div class="section-overlay animate js-loading">
+            <div class="loader"></div>
+            <div class="error-tip"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="container">footer</div>
+    </div>
+  </div>
+
+  <div class="config-panel">
+
+  </div>
+
+  <!-- inject external scripts -->
+  <script src="/node_modules/ace-builds/src-noconflict/ace.js"></script>
+  <script type="text/javascript" src="/assets/visual-rlg.bundle.js"></script>
+</body>
+</html>
