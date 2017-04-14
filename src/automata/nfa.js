@@ -105,25 +105,28 @@ export default class NFA extends Graph {
       if (vertex.isset('tooltip')) {
         attrs.tooltip = vertex.get('tooltip');
       }
-      instructions.push(`  ${vertex.id} [${this.genDotAttrs(attrs)}];`);
+      instructions.push(`  ${JSON.stringify(vertex.id)} [${this.genDotAttrs(attrs)}];`);
     }
     for (let edge of this._edges) {
       const attrs = {
         id: 'e' + edge.id,
         label: edge.label || (edge.get('match') == this._props.epsilon ? 'ε' : edge.id),
       };
+      if (attrs.label == ' ') {
+        attrs.label = '" "';
+      }
       if (edge.isset('tooltip')) {
         attrs.tooltip = edge.get('tooltip');
       }
       if (noarrow) {
         attrs.dir = 'none';
       }
-      instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
+      instructions.push(`  ${edge.from && JSON.stringify(edge.from.id)} -> ${edge.to && JSON.stringify(edge.to.id)} [${this.genDotAttrs(attrs)}];`);
     }
     instructions.push('  node [shape=none label="" fixedsize=true width=0 height=0];');
     const entries = this._props.entries;
     for (let i = 0, size = entries.length; i < size; ++i) {
-      instructions.push(`  _invis${i} -> ${entries[i].id}${noarrow ? '[dir="none"]' : ''};`);
+      instructions.push(`  _invis${i} -> ${JSON.stringify(entries[i].id)}${noarrow ? '[dir="none"]' : ''};`);
     }
     instructions.push('}');
     return instructions.join('\n');

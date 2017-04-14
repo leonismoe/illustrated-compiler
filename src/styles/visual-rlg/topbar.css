@@ -1,13 +1,8 @@
 .topbar {
   width: 100%;
   color: #fff;
-  background-color: #000;
-
-  &,
-  & > .container {
-    height: 36px;
-    line-height: 36px;
-  }
+  background-color: #1b1c1d;
+  line-height: 1;
 }
 
 .topbar-menu {
@@ -15,12 +10,18 @@
   padding: 0;
   font-size: 0;
 
-  & > .item {
+  & a {
+    color: #fff;
+    text-decoration: none;
+  }
+
+  & > .item,
+  & > .right > .item {
     font-size: 1rem;
     position: relative;
     display: inline-block;
-    padding-left: 0.95em;
-    padding-right: 0.95em;
+    padding: 0.55em 0.95em;
+    vertical-align: middle;
 
     &::before {
       content: '';
@@ -29,20 +30,33 @@
       right: 0;
       width: 1px;
       height: 100%;
-      background-image: linear-gradient(rgba(255,255,255,0.1) 0,rgba(255,255,255,0.24) 50%,rgba(255,255,255,0.1) 100%);
+      background-image: linear-gradient(rgba(255,255,255,0.03) 0,rgba(255,255,255,0.1) 50%,rgba(255,255,255,0.03) 100%);
+    }
+
+    & .fa {
+      opacity: 0.75;
     }
   }
 
-  & > a.item {
+  & > a.item,
+  & > .right > a.item {
     height: 100%;
 
     &:hover {
-      background-color: color(#000 lightness(10%));
+      background-color: rgba(255,255,255,0.1);
+    }
+
+    &:active {
+      background-color: rgba(255,255,255,0.15);
     }
   }
 
-  &.right > .item::before {
-    left: 0;
-    right: auto;
+  & > .right {
+    float: right;
+
+    & > .item::before {
+      left: 0;
+      right: auto;
+    }
   }
 }

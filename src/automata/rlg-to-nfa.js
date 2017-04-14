@@ -45,18 +45,18 @@ export default class RLG2NFA {
     const rules = [];
     for (let i = 0, len = lines.length; i < len; ++i) {
       if (!lines[i]) continue; // empty line
-      const parts = lines[i].split(regex_produce);
-      if (parts.length > 2) {
-        throw new ParseError('Unexpected "define as" / "consist of" symbol', i, parts[0].length + parts[1].length + lines[i].match(regex_produce)[0].length);
-      }
+      const parts = lines[i].split(regex_produce, 2);
       if (parts.length < 2) {
         throw new ParseError('Unexpected EOL, expecting "define as" / "consist of" symbol', i, lines[i].length);
       }
 
       const nonterminal = parts[0].trim();
       const expressions = parts[1].split('|');
+      if (!nonterminal) {
+        throw new ParseError('Unexpected "define as" / "consist of" symbol, expecting rule identifier (nonterminal)', i, 0);
+      }
       if (!/^<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*'*>?$/.test(nonterminal)) {
-        throw new ParseError('Rule identifier (nonterminal) is not legal', i, 0);
+        throw new ParseError('Rule identifier (nonterminal) is invalid', i, 0);
       }
 
       nonterminals.push(nonterminal);
@@ -81,6 +81,12 @@ export default class RLG2NFA {
         }
         if (nt_offset == 0) {
           throw new ParseError('The expression should contain at least one terminal', i);
+        }
+        const epsilon_offset = expr.indexOf(this.options.epsilon);
+        if (epsilon_offset > -1) {
+          if (expr != this.options.epsilon) {
+            throw new ParseError('There should be nothing around epsilon', i);
+          }
         }
         const prefix = nt_offset < 0 ? expr : expr.slice(0, nt_offset).trim();
         const prod = [];

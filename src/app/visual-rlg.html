@@ -14,6 +14,9 @@
         <div class="topbar-menu">
           <div class="item"><strong>Illustrated Compiler</strong></div>
           <div class="item"><strong>Visual RLG</strong></div>
+          <div class="right">
+            <a class="item" href="#"><i class="fa fa-cog"></i></a>
+          </div>
         </div>
       </div>
     </div>
@@ -29,6 +32,7 @@
           <div class="section-title">Text</div>
           <div class="section-body editor-text" id="editor-text">
             <input type="text" class="editor-text-input" id="editor-text-input" value="" />
+            <div class="marker"></div>
           </div>
         </div>
       </div>
@@ -39,19 +43,15 @@
         <div class="section section-nfa">
           <div class="section-title">NFA</div>
           <div class="section-body graph-nfa use-arrow"></div>
-          <div class="section-overlay animate js-loading">
-            <div class="loader"></div>
-            <div class="error-tip"></div>
-          </div>
         </div>
         <div class="resizer-wrapper horizontal"><div class="resizer"></div></div>
         <div class="section section-dfa">
           <div class="section-title">DFA</div>
           <div class="section-body graph-dfa use-arrow"></div>
-          <div class="section-overlay animate js-loading">
-            <div class="loader"></div>
-            <div class="error-tip"></div>
-          </div>
+        </div>
+        <div class="section-overlay graph-overlay animate js-loading">
+          <div class="loader"></div>
+          <div class="error-tip"></div>
         </div>
       </div>
     </div>
