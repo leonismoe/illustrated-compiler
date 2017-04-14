@@ -55,8 +55,8 @@ export default class RLG2NFA {
 
       const nonterminal = parts[0].trim();
       const expressions = parts[1].split('|');
-      if (/\s/.test(nonterminal)) {
-        throw new ParseError('Unexpected whitespace in nonterminal', i, parts[0].ltrim().indexOf(' '));
+      if (!/^<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*'*>?$/.test(nonterminal)) {
+        throw new ParseError('Rule identifier (nonterminal) is not legal', i, 0);
       }
 
       nonterminals.push(nonterminal);

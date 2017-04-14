@@ -14,7 +14,7 @@ module.exports = {
   context: path.resolve(__dirname, '../../src'),
   entry: {
     app: './app.js',
-    'visual-rlg': './visual-rlg.js',
+    'visual-rlg': './app/visual-rlg.js',
   },
   externals,
   module: {
@@ -31,6 +31,23 @@ module.exports = {
             'postcss-loader',
           ],
         }),
+      },
+      {
+        test: /\.inline\.worker\.js$/,
+        use: {
+          loader: 'worker-loader',
+          options: {
+            inline: true,
+            fallback: false,
+          }
+        }
+      },
+      {
+        test: /\.worker\.js$/,
+        use: {
+          loader: 'worker-loader',
+          options: {}
+        }
       },
     ],
   },

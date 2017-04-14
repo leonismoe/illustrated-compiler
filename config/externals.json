@@ -1,7 +1,7 @@
 {
   "normalize.css": null,
   "font-awesome": null,
-  "codemirror": "CodeMirror",
+  "ace-builds/src-noconflict/ace": "ace",
   "viz.js": "Viz",
   "wolfy87-eventemitter": "EventEmiter"
 }
