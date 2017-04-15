@@ -1,5 +1,9 @@
 import throttle from 'lodash/throttle';
 
+// https://css-tricks.com/debouncing-throttling-explained-examples/
+// https://www.html5rocks.com/en/tutorials/speed/animations/
+// maybe we should use rAF, but every width/height change results in reflows and repaints
+
 const instances = [];
 
 let initialSize = null;
@@ -45,7 +49,7 @@ document.addEventListener('mouseup', function(e) {
   target = null;
 }, false);
 
-document.addEventListener('mousemove', function(e) {
+document.addEventListener('mousemove', throttle(function(e) {
   if (!target) {
     return;
   }
@@ -87,7 +91,7 @@ document.addEventListener('mousemove', function(e) {
       options.callback();
     }
   }
-}, false);
+}, 16), false);
 
 export default class Resizer {
 

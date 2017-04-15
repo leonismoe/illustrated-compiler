@@ -89,11 +89,15 @@ export default class NFA extends Graph {
   }
 
   toDOT(name, noarrow) {
+    const entries = this._props.entries;
     const terminals = this.terminals;
     const instructions = [];
     instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
+    for (let i = 0, size = entries.length; i < size; ++i) {
+      instructions.push(`  _invis${i} [shape=none label="" fixedsize=true width=0 height=0];`);
+    }
     if (terminals.length) {
-      instructions.push('  node [shape=doublecircle]; ' + terminals.map(v => v.id).join(' ') + ';');
+      instructions.push('  node [shape=doublecircle]; ' + terminals.map(v => JSON.stringify(v.id)).join(' ') + ';');
     }
     instructions.push('  node [shape=circle];');
     instructions.push('  rankdir=LR;');
@@ -106,6 +110,9 @@ export default class NFA extends Graph {
         attrs.tooltip = vertex.get('tooltip');
       }
       instructions.push(`  ${JSON.stringify(vertex.id)} [${this.genDotAttrs(attrs)}];`);
+    }
+    for (let i = 0, size = entries.length; i < size; ++i) {
+      instructions.push(`  _invis${i} -> ${JSON.stringify(entries[i].id)}${noarrow ? '[dir="none"]' : ''};`);
     }
     for (let edge of this._edges) {
       const attrs = {
@@ -122,11 +129,6 @@ export default class NFA extends Graph {
         attrs.dir = 'none';
       }
       instructions.push(`  ${edge.from && JSON.stringify(edge.from.id)} -> ${edge.to && JSON.stringify(edge.to.id)} [${this.genDotAttrs(attrs)}];`);
-    }
-    instructions.push('  node [shape=none label="" fixedsize=true width=0 height=0];');
-    const entries = this._props.entries;
-    for (let i = 0, size = entries.length; i < size; ++i) {
-      instructions.push(`  _invis${i} -> ${JSON.stringify(entries[i].id)}${noarrow ? '[dir="none"]' : ''};`);
     }
     instructions.push('}');
     return instructions.join('\n');
