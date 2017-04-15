@@ -126,6 +126,9 @@ export default class DFA extends NFA {
     const nfa = this.get('nfa');
     const instructions = [];
     instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
+    if (this.entry) {
+      instructions.push('  _invis [shape=none label="" fixedsize=true width=0 height=0];');
+    }
     if (this._terminals.length) {
       instructions.push('  node [shape=doublecircle]; ' + this._terminals.map(v => v.id).join(' ') + ';');
     }
@@ -143,6 +146,9 @@ export default class DFA extends NFA {
       }
       instructions.push(`  ${vertex.id} [${this.genDotAttrs(attrs)}];`);
     }
+    if (this.entry) {
+      instructions.push(`  _invis -> ${this.entry.id}${noarrow ? '[dir="none"]' : ''};`);
+    }
     for (let edge of this._edges) {
       const attrs = {
         id: 'e' + edge.id,
@@ -158,10 +164,6 @@ export default class DFA extends NFA {
         attrs.dir = 'none';
       }
       instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
-    }
-    if (this.entry) {
-      instructions.push('  _invis [shape=none label="" fixedsize=true width=0 height=0];');
-      instructions.push(`  _invis -> ${this.entry.id}${noarrow ? '[dir="none"]' : ''};`);
     }
     instructions.push('}');
     return instructions.join('\n');
