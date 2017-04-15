@@ -82,8 +82,8 @@ body {
   margin-right: -1px;
 
   & > .section-title {
-    margin-top: -1px;
-    margin-right: -1px;
+    margin-top: 1px;
+    margin-right: 1px;
   }
 }
 
@@ -93,8 +93,8 @@ body {
 }
 .section-title {
   position: absolute;
-  top: 7px;
-  right: 5px;
+  top: 6px;
+  right: 6px;
   z-index: 90;
   /*color: #004966;*/
   /*background-color: #7fdbff;*/
@@ -133,6 +133,11 @@ body {
     border-color: #2188ff;
     outline: none;
     box-shadow: inset 0 0 0 0.2em rgba(3,102,214,0.3);
+  }
+
+  &[disabled] {
+    user-select: none;
+    box-shadow: inset 0 0 0 0.2em rgba(238,238,238,0.8);
   }
 }
 

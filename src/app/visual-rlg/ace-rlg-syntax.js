@@ -19,7 +19,7 @@ const Rules = {
     },
     {
       token: ['constant.identifier', 'keyword.operator.assignment'],
-      regex: /^(\s*<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*'*>?\s*)(=>|->|::=)/,
+      regex: /^(\s*<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*(?:'|`)*(?:\?|\+|\*)?>?\s*)(=>|->|::=)/,
     },
   ],
 };
