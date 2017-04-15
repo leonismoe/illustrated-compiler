@@ -73,9 +73,18 @@ document.addEventListener('mousemove', function(e) {
     check = true;
   }
   if (newValue >= 0 && check) {
-    target.style[property] = newValue + 'px';
+    if (options.relative) {
+      const total = property == 'width' ? options.relative.scrollWidth : options.relative.scrollHeight;
+      if (newValue > total) {
+        return;
+      }
+      newValue = (newValue / total) * 100 + '%';
+    } else {
+      newValue += 'px';
+    }
+    target.style[property] = newValue;
     if (options.callback) {
-      options.callback.apply(null);
+      options.callback();
     }
   }
 }, false);
@@ -90,6 +99,9 @@ export default class Resizer {
     this.adjusting = false;
     this.maxsize   = maxsize;
     this.options   = options;
+    if (typeof this.options.relative == 'string') {
+      this.options.relative = document.querySelector(this.options.relative);
+    }
 
     if (this.$resizer.className.indexOf('resizer-wrapper') > -1) {
       this.$resizer = this.$resizer.querySelector('.resizer');

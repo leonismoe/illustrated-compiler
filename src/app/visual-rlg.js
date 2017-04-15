@@ -31,6 +31,7 @@ const editorRLG = ace.edit($grammar);
 // editorRLG.setTheme('ace/theme/tommorow');
 editorRLG.getSession().setMode('ace/mode/rlg');
 editorRLG.setValue(initial_text, 1);
+editorRLG.setShowPrintMargin(false);
 editorRLG.setHighlightActiveLine(false);
 editorRLG.setHighlightGutterLine(false);
 editorRLG.renderer.$cursorLayer.element.style.display = 'none';
@@ -44,6 +45,11 @@ editorRLG.on('blur', () => {
   editorRLG.setHighlightGutterLine(false);
 });
 
+const getBoolAttr = (node, property) => {
+  const value = node.getAttribute(property);
+  return value == 'true' || value == property;
+};
+
 const $text = document.getElementById('editor-text');
 // debug
 window.marker = new TextMarker('.editor-text .marker', '18px/1 "Source Code Pro", consolas, monospace, "Microsoft YaHei UI", sans-serif');
@@ -53,9 +59,9 @@ const resizeEditor = () => {
   editorRLG.resize();
 };
 
-new Resizer('.panel-resizer', '.panel-left', { callback: resizeEditor });
-new Resizer('.panel-left > .resizer-wrapper', '.section-text', { callback: resizeEditor, inverse: true });
-new Resizer('.panel-right > .resizer-wrapper', '.section-nfa');
+new Resizer('.panel-resizer', '.panel-left', { callback: resizeEditor, relative: '.main-frame' });
+new Resizer('.panel-left > .resizer-wrapper', '.section-text', { callback: resizeEditor, inverse: true, relative: '.panel-left' });
+new Resizer('.panel-right > .resizer-wrapper', '.section-nfa', { relative: '.panel-right' });
 
 // new DragScroll('.graph-nfa');
 // new DragScroll('.graph-dfa');

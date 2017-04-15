@@ -33,8 +33,9 @@ export default class RLG2NFA {
     // merge lines
     let i = 1;
     while (i < lines.length) {
-      if (!regex_produce.test(lines[i])) {
-        lines[i - 1] += lines[i];
+      const line = lines[i];
+      if (!regex_produce.test(line) && (line.trim().slice(0, 1) == '|' || lines[i - 1].trim().slice(-1) == '|')) {
+        lines[i - 1] += line;
         lines.splice(i, 1);
       } else {
         ++i;
@@ -50,12 +51,12 @@ export default class RLG2NFA {
         throw new ParseError('Unexpected EOL, expecting "define as" / "consist of" symbol', i, lines[i].length);
       }
 
-      const nonterminal = parts[0].trim();
-      const expressions = parts[1].split('|');
+      const nonterminal = parts[0].replace(/^[\s\uFEFF\xA0<]+|[\s\uFEFF\xA0>]+$/g, '');
+      const expressions = parts[1].replace(/[\s\uFEFF\xA0<]/g, '').split('|');
       if (!nonterminal) {
         throw new ParseError('Unexpected "define as" / "consist of" symbol, expecting rule identifier (nonterminal)', i, 0);
       }
-      if (!/^<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*'*>?$/.test(nonterminal)) {
+      if (!/^[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*('|`)*(\?|\+|\*)?$/.test(nonterminal)) {
         throw new ParseError('Rule identifier (nonterminal) is invalid', i, 0);
       }
 
@@ -73,9 +74,10 @@ export default class RLG2NFA {
         if (!expr) {
           throw new ParseError('The expression cannot be empty', i);
         }
-        let nt_offset;
+        let nt_offset = -1;
         for (let nt of nonterminals) {
-          if ((nt_offset = expr.lastIndexOf(nt)) > -1) {
+          if (expr.slice(-nt.length) == nt) {
+            nt_offset = expr.length - nt.length;
             break;
           }
         }
