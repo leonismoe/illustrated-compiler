@@ -106,7 +106,8 @@ export default class DFA extends NFA {
       this.reset();
       for (let i = 0, size = str.length; i <= size; ++i) {
         last_test = this.next(str[i]);
-        if (last_test.done) break;
+        if (last_test.error) break;
+        if (last_test.done && i == size) break;
       }
     } else {
       outer:

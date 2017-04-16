@@ -1,5 +1,7 @@
 :root {
   --sm-highlight-color: #ff8a27;
+  --sm-resolve-color: #23d18b;
+  --sm-reject-color: #ff4136;
   --sm-node-anim-duration: 0.4s;
   --sm-path-anim-duration: 0.8s;
   --sm-path-anim-easing: cubic-bezier(0.5, 1, 0.5, 0);
@@ -8,6 +10,7 @@
 .graph text {
   font-family: inherit;
 }
+
 .graph .node text {
   font-size: 16px;
   font-weight: bold;
@@ -35,7 +38,6 @@
 }
 
 .graph .node.highlight {
-
   /**
    * can't specify class name in DOT
    * https://github.com/ellson/graphviz/blob/3e6b92b1d24a6deb478140f2e1410bc98e6b4d9f/plugin/core/gvrender_core_svg.c#L302
@@ -56,4 +58,27 @@
     fill: #fff;
   }
 
+  &.resolved {
+    & ellipse:first-child {
+      fill: var(--sm-resolve-color);
+    }
+
+    & ellipse {
+      stroke: var(--sm-resolve-color);
+    }
+
+    & text {
+      fill: #fff;
+    }
+  }
+
+  &.rejected {
+    & ellipse:first-child {
+      fill: var(--sm-reject-color);
+    }
+
+    & ellipse {
+      stroke: var(--sm-reject-color);
+    }
+  }
 }

@@ -15,7 +15,7 @@ export default class VizFactory {
   compute(dot, options) {
     return new Promise((resolve, reject) => {
       if (this._worker && !this._reuse) {
-        this._worker.onerror({ message: 'Task canceled' });
+        this._worker.onerror({ message: 'Task canceled', canceled: true });
         this._worker.terminate();
         this._worker = null;
       }
