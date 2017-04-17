@@ -3,7 +3,7 @@ import '../styles/visual-rlg/index.css';
 import debounce from 'lodash/debounce';
 
 import Automata from './visual-rlg/automata';
-import EditorRLG from './visual-rlg/grammar-editor';
+import Editor from './visual-rlg/rlg-editor';
 import MediaControls from './visual-rlg/media-controls';
 import VisualDFA from '../automata/visual-dfa';
 import VisualScanner from './visual-rlg/visual-scanner';
@@ -19,8 +19,6 @@ const options = {
   final_state_name: 'Y',
 };
 
-const font = '18px/1 "Source Code Pro", consolas, monospace, "Microsoft YaHei UI", sans-serif';
-
 const initial_text = `# a+b*
 S -> aS | aC
 C -> b | bC | $`;
@@ -33,27 +31,35 @@ const controls = new MediaControls('.media-controls');
 
 
 // ============================================================
-// Initialize Automata Drawing and Grammar Editor
+// DOM
+// ============================================================
+const $dfa = document.querySelector('.graph-dfa');
+const $marker = document.querySelector('.editor-text .marker');
+const $text = document.getElementById('editor-text-input');
+const text_input_font = getComputedStyle($text).getPropertyValue('font');
+
+
+// ============================================================
+// Initialize Automata Drawing and RLG/RegExp Editor
 // ============================================================
 Automata.setConfig(options);
-updateGrammar(initial_text);
+updateAutomata(initial_text);
 
-EditorRLG.setValue(initial_text, 1);
-EditorRLG.getSession().on('change', debounce(() => {
-  const text = EditorRLG.getValue();
+Editor.setValue(initial_text, 1);
+Editor.getSession().on('change', debounce(() => {
+  const text = Editor.getValue();
   if (text) {
-    updateGrammar(text);
+    updateAutomata(text);
   }
 }, 500));
 
-const $dfa = document.querySelector('.graph-dfa');
-const $marker = document.querySelector('.editor-text .marker');
-function updateGrammar(grammar) {
-  return Automata.update(grammar)
+function updateAutomata(text) {
+  return Automata.update(text, 'rlg')
     .then(([nfa, dfa]) => {
       const vdfa = new VisualDFA(dfa, $dfa);
-      controls.setController(new VisualScanner(vdfa, $marker, font), true);
-    });
+      controls.setController(new VisualScanner(vdfa, $marker, text_input_font));
+      $text.value = '';
+    }, function(e) {});
 }
 
 
@@ -65,11 +71,14 @@ const getBoolAttr = (node, property) => {
   return value == 'true' || value == property;
 };
 
-const $text = document.getElementById('editor-text-input');
 $text.addEventListener('change', (e) => {
-  // $text.setAttribute('disabled', 'disabled');
-  controls.getController().prepare($text.value, true);
-  controls.reset(true);
+  if ($text.value) {
+    // $text.setAttribute('disabled', 'disabled');
+    controls.getController().prepare($text.value, true);
+    controls.reset();
+  } else {
+    controls.clear();
+  }
 }, false);
 
 
@@ -77,7 +86,7 @@ $text.addEventListener('change', (e) => {
 // Initialize Panel Adjuster
 // ============================================================
 function resizeEditor() {
-  EditorRLG.resize();
+  Editor.resize();
 }
 
 new Resizer('.panel-resizer', '.panel-left', { callback: resizeEditor, relative: '.main-frame' });

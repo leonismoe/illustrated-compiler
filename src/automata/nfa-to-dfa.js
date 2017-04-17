@@ -13,7 +13,7 @@ export default function NFA2DFA(object) {
 
   const epsilon_symbol = object.get('epsilon');
   const terminals = object.terminals;
-  const accepts = get_accepts(object);
+  const { accepts, labels } = get_accepts(object);
   const nfa_states = [ epsilon_closure(object.entries, epsilon_symbol) ];
 
   const dfa = new DFA();
@@ -24,7 +24,9 @@ export default function NFA2DFA(object) {
 
   for (let i = 0; i < nfa_states.length; ++i) {
     const state_set = nfa_states[i];
-    for (let accept of accepts) {
+    for (let j = 0, len = accepts.length; j < len; ++j) {
+      const accept = accepts[j];
+      const label = labels[j] || accept.source || accept;
       const new_state = epsilon_closure(move_closure(state_set, accept), epsilon_symbol);
       if (new_state.length == 0) continue;
       let index = state_index(nfa_states, new_state);
@@ -33,7 +35,7 @@ export default function NFA2DFA(object) {
         nfa_states.push(new_state);
         states.push(dfa.addVertex({ 'nfa-mapping': map_to_id(new_state), terminal: contain_terminal(terminals, new_state) }));
       }
-      dfa.addEdge(states[i], states[index], { accept, label: accept.source || accept });
+      dfa.addEdge(states[i], states[index], { accept, label });
     }
   }
   return dfa;
@@ -87,16 +89,18 @@ function get_terminals(nfa) {
 
 function get_accepts(nfa) {
   const accepts = [];
+  const labels = [];
   const epsilon = nfa.get('epsilon');
   for (let edge of nfa.getEdges()) {
     const accept = edge.get('accept');
-    if (accept !== undefined && accept != epsilon) {
+    if (accept !== undefined && accept !== null && accept != epsilon) {
       if (accepts.indexOf(accept) < 0) {
         accepts.push(accept);
+        labels.push(edge.get('label'));
       }
     }
   }
-  return accepts;
+  return { accepts, labels };
 }
 
 function state_index(states, check) {

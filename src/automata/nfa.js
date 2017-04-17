@@ -119,9 +119,6 @@ export default class NFA extends Graph {
         id: 'e' + edge.id,
         label: edge.label || (edge.get('match') == this._props.epsilon ? 'ε' : edge.id),
       };
-      if (attrs.label == ' ') {
-        attrs.label = '" "';
-      }
       if (edge.isset('tooltip')) {
         attrs.tooltip = edge.get('tooltip');
       }

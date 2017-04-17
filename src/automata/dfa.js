@@ -155,9 +155,6 @@ export default class DFA extends NFA {
         id: 'e' + edge.id,
         label: edge.labelOrId,
       };
-      if (attrs.label == ' ') {
-        attrs.label = '" "';
-      }
       if (edge.isset('tooltip')) {
         attrs.tooltip = edge.get('tooltip');
       }

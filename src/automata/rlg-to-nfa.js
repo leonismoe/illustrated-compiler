@@ -26,9 +26,9 @@ export default class RLG2NFA {
   }
 
   parse(text) {
-    const regex_produce = /=>|->|::=/;
+    const regex_produce = /->|::=/;
     const regex_comment = this.options.comment ? new RegExp(this.options.comment.replace(/(\^|\$|\.|\/|\{|\}|\(|\)|\[|\]|\+|\*|\?)/g, '\\$1') + '.*$', 'gm') : null;
-    const lines = (regex_comment ? text.replace(regex_comment, '') : text).split('\n');
+    const lines = (regex_comment ? text.replace(regex_comment, '') : text).split(/\r|\n/);
 
     // merge lines
     let i = 1;
@@ -51,12 +51,18 @@ export default class RLG2NFA {
         throw new ParseError('Unexpected EOL, expecting "define as" / "consist of" symbol', i, lines[i].length);
       }
 
-      const nonterminal = parts[0].replace(/^[\s\uFEFF\xA0<]+|[\s\uFEFF\xA0>]+$/g, '');
-      const expressions = parts[1].replace(/[\s\uFEFF\xA0<]/g, '').split('|');
+      const nonterminal = parts[0].trim();
+      const expressions = parts[1].replace(/[\s\uFEFF\xA0]/g, '').split('|');
       if (!nonterminal) {
         throw new ParseError('Unexpected "define as" / "consist of" symbol, expecting rule identifier (nonterminal)', i, 0);
       }
-      if (!/^[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*('|`)*(\?|\+|\*)?$/.test(nonterminal)) {
+      if (nonterminal[0] == '<' && nonterminal[nonterminal.length - 1] != '>') {
+        throw new ParseError('Unmatched "<"', i, 0);
+      }
+      if (nonterminal[0] != '<' && nonterminal[nonterminal.length - 1] == '>') {
+        throw new ParseError('Character ">" is not allowed here', i, nonterminal.length - 1);
+      }
+      if (!/^<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*('|`)*(\?|\+|\*)?>?$/.test(nonterminal)) {
         throw new ParseError('Rule identifier (nonterminal) is invalid', i, 0);
       }
 
@@ -135,10 +141,12 @@ export default class RLG2NFA {
       nodes_added.push(final_terminal_name);
     }
 
-    for (let nonterminal in producers) {
-      nfa.addState(nonterminal, { label: nonterminal });
+    for (let nonterminal of prod_names) {
+      nfa.addState(nonterminal, { label: nonterminal[0] == '<' ? nonterminal.slice(1, -1) : nonterminal });
       nodes_added.push(nonterminal);
+    }
 
+    for (let nonterminal in producers) {
       for (let rule of producers[nonterminal]) {
         const last = rule[rule.length - 1];
         const contains_nonterminal = last.type == 'nonterminal';
@@ -169,8 +177,7 @@ export default class RLG2NFA {
           if (!next && this.options.only_one_terminal || next == this.options.epsilon) {
             next = final_terminal_name;
           }
-          const trans_id = `${current}-${ch.value}-${next}`;
-          nfa.addEdge(trans_id, nfa.getState(current), nfa.getState(next), { accept: ch.value, label });
+          nfa.addEdge(nfa.getState(current), nfa.getState(next), { accept: ch.value, label });
           current = next;
         }
       }
