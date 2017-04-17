@@ -48,15 +48,16 @@ export default class MediaControls {
       return this.clear(allow_play_btn);
     }
 
-    this.clearTimer();
     this._total = this._object.getTotalSteps();
     if (this._total > 1) {
+      this.clearTimer();
+      this.$play_controls.classList.remove('disabled');
       this.$btn_play.classList.remove('disabled', 'pause', 'restart');
       this.$btn_play.classList.add('play');
       this.$btn_play.setAttribute('title', 'Play');
       this.goto(0, true);
     } else {
-      this.disableButtons(allow_play_btn);
+      this.clear(allow_play_btn);
     }
   }
 
@@ -65,6 +66,9 @@ export default class MediaControls {
     this._total = 0;
     this._step = 0;
     this.disableButtons(allow_play_btn);
+    if (this._object && this._object.clear) {
+      this._object.clear();
+    }
   }
 
   disableButtons(allow_play_btn) {

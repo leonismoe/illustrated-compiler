@@ -1,5 +1,6 @@
 import NFA from './nfa';
 import ParseError from './parse-error';
+import {escape} from '../utils/escape';
 
 const defaultOptions = {
   epsilon_symbol: 'ε',
@@ -58,17 +59,19 @@ export default class Regex2NFA {
     const tokens = [];
     const octs = [];
 
-    let escaped = false;
+    let escaping = false;
     let paren_count = 0;
     for (let i = 0, len = regex.length; i < len; ++i) {
       let ch = regex[i];
       let token = null;
-      if (ch == '\\' && !escaped) {
-        escaped = true;
+      let escaped = false;
+      if (ch == '\\' && !escaping) {
+        escaping = true;
         continue;
       }
-      if (escaped) {
-        escaped = false;
+      if (escaping) {
+        escaped = true;
+        escaping = false;
         ch = '\\' + ch;
       }
 
@@ -128,6 +131,11 @@ export default class Regex2NFA {
         } else if ('tnvfrdDsSwW'.indexOf(ch[1]) < 0) {
           ch = ch[1];
         }
+      }
+
+      if (escaped) {
+        tokens.push({ type: 'char', value: ch, text: ch.length > 1 ? ch : '\\' + ch, offset: i });
+        continue;
       }
 
       if (ch == '(') {
@@ -259,7 +267,6 @@ export default class Regex2NFA {
     }
 
     return tokens;
-
   }
 
   tokens2rpn(tokens) {
@@ -367,8 +374,9 @@ export default class Regex2NFA {
     for (let token of tokens) {
       if (token.type == 'char' || token.type == 'range') {
         const begin = nfa.addState();
-        const ch = token.value[0] == '\\' || token.type == 'range' ? new RegExp(`[${token.value}]`) : token.value;
-        const edge = nfa.addEdge(begin, null, { accept: ch, label: token.value });
+        const accept = token.value[0] == '\\' || token.type == 'range' ? new RegExp(`[${token.value}]`) : token.value;
+        const label = token.type == 'range' ? `[${token.value}]` : (token.value[0] == '\\' ? token.value[0] : escape(token.value, ['escape-sequence', 'space-open-box']));
+        const edge = nfa.addEdge(begin, null, { accept, label, text: token.value });
         stack.push({ entry: begin, edges: [edge], simple: true });
 
       } else if (token.type == 'concat') {
@@ -526,74 +534,6 @@ export default class Regex2NFA {
     }
 
     return nfa;
-  }
-
-  // http://stackoverflow.com/questions/10220401/c-string-literals-escape-character/10220539#10220539
-  escape(str, allowRegexp) {
-    if (str[0] != '\\') {
-      return str[0];
-    }
-
-    let temp;
-    switch (str[1]) {
-      // case 'a': return '\x07'; // alert (bell)
-      case 'b': return '\x08'; // backspace
-      case 't': return '\x09'; // horizontal tab
-      case 'n': return '\x0a'; // new line (line feed)
-      case 'v': return '\x0b'; // vertical tab
-      case 'f': return '\x0c'; // form feed
-      case 'r': return '\x0d'; // carriage return
-      // case 'e': return '\x1b'; // escape (non-standard GCC extension)
-
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-        temp = str[1];
-        for (let i = 2; i <= 3 && i < str.length && /\d/.test(str[i]); ++i) {
-          temp += str[i];
-        }
-        return String.fromCharCode(temp | 0);
-
-      case 'x':
-        temp = '';
-        for (let i = 2; i <= 3 && i < str.length && /[0-9a-f]/i.test(str[i]); ++i) {
-          temp += str[i];
-        }
-        if (temp.length != 2) {
-          return 'x';
-        }
-        return String.fromCharCode(parseInt(temp, 16));
-
-      case 'u':
-        temp = '';
-        for (let i = 2; i <= 5 && i < str.length && /[0-9a-f]/i.test(str[i]); ++i) {
-          temp += str[i];
-        }
-        if (temp.length != 4) {
-          return 'u';
-        }
-        return String.fromCharCode(parseInt(temp, 16));
-
-      case 'd':
-      case 'D':
-      case 's':
-      case 'S':
-      case 'w':
-      case 'W':
-        if (allowRegexp) {
-          return new RegExp(str.slice(0, 2));
-        }
-
-      default: // eslint-disable-line no-fallthrough
-        return str[1];
-    }
   }
 
   inspect_tokens(tokens) {
