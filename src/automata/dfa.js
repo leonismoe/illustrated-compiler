@@ -2,6 +2,7 @@
 
 import NFA from './nfa';
 import NFA2DFA from './nfa-to-dfa';
+import { Edge } from '../graph';
 
 export default class DFA extends NFA {
 
@@ -39,8 +40,8 @@ export default class DFA extends NFA {
     return this.get('entry');
   }
 
-  static from(object) {
-    return NFA2DFA(object);
+  static from(object, options) {
+    return NFA2DFA(object, options);
   }
 
   reset() {
@@ -123,7 +124,76 @@ export default class DFA extends NFA {
     return last_test.done && !last_test.error;
   }
 
-  toDOT(name, noarrow) {
+  // mount(dfa, edge)
+  // mount(dfa, props, state?)
+  // mount(dfa, accept, state?)
+  mount(dfa, edge, state) {
+    if (!(dfa instanceof DFA)) {
+      throw new TypeError('The object to be mounted is not a DFA instance');
+    }
+
+    if (!(edge instanceof Edge)) {
+      if (!state) {
+        state = dfa.entry;
+      }
+
+      // mount(dfa, props, state)
+      if (edge && Object.getPrototypeOf(edge) == Object) {
+        edge = new Edge(null, null, state, edge);
+
+      // mount(dfa, accept, state)
+      } else {
+        edge = new Edge(null, null, state, { accept: edge, label: '' + edge });
+      }
+    }
+
+    if (!edge.isset('accept') || edge.get('accept') == '') {
+      throw new Error('The edge is invalid: property accept is empty');
+    }
+
+    if (!edge.from) {
+      edge.from = this.entry;
+    } else if (edge.from != this.getVertexById(edge.from.id)) {
+      throw new Error('The source state does not exist in the source DFA');
+    }
+
+    if (!edge.to) {
+      if (!dfa.entry) {
+        throw new Error('The target DFA has no entries');
+      }
+      edge.to = dfa.entry;
+    } else if (edge.to && edge.to != dfa.getVertexById(edge.to.id)) {
+      throw new Error('The target state does not exist in the target DFA');
+    }
+
+    const mount_accept = edge.get('accept');
+    for (let temp of edge.from.out) {
+      if (temp.get('accept') == mount_accept) {
+        throw new Error(`The transition of "${mount_accept}" exists in the source DFA`);
+      }
+    }
+
+    const state_mapping = Object.create(null);
+    if (edge.to) {
+      state_mapping[edge.to.id] = this.addState(edge.to.getProps());
+    }
+    this.addEdge(edge.from, edge.to && state_mapping[edge.to.id], edge.getProps());
+    edge.bfs((trans) => {
+      if (trans.to && !state_mapping[trans.to.id]) {
+        state_mapping[trans.to.id] = this.addState(trans.to.getProps());
+      }
+      if (edge != trans) {
+        this.addEdge(state_mapping[trans.from.id], trans.to && state_mapping[trans.to.id], trans.getProps());
+      }
+    });
+  }
+
+  toDOT(name, options) {
+    options = Object.assign({
+      noarrow: false,
+      hide_duplicate_edges: false,
+    }, options);
+
     const nfa = this.get('nfa');
     const instructions = [];
     instructions.push(`digraph ${name ? JSON.stringify(name) : ''} {`);
@@ -148,20 +218,28 @@ export default class DFA extends NFA {
       instructions.push(`  ${vertex.id} [${this.genDotAttrs(attrs)}];`);
     }
     if (this.entry) {
-      instructions.push(`  _invis -> ${this.entry.id}${noarrow ? '[dir="none"]' : ''};`);
+      instructions.push(`  _invis -> ${this.entry.id}${options.noarrow ? '[dir="none"]' : ''};`);
     }
+    const edge_map = Object.create(null);
     for (let edge of this._edges) {
       const attrs = {
         id: 'e' + edge.id,
         label: edge.labelOrId,
       };
+      const _from = edge.from && edge.from.id;
+      const _to   = edge.to && edge.to.id;
+      if (options.hide_duplicate_edges) {
+        const cache_key = `${_from}-${_to}-${attrs.label}`;
+        if (edge_map[cache_key]) continue;
+        edge_map[cache_key] = true;
+      }
       if (edge.isset('tooltip')) {
         attrs.tooltip = edge.get('tooltip');
       }
-      if (noarrow) {
+      if (options.noarrow) {
         attrs.dir = 'none';
       }
-      instructions.push(`  ${edge.from && edge.from.id} -> ${edge.to && edge.to.id} [${this.genDotAttrs(attrs)}];`);
+      instructions.push(`  ${_from} -> ${_to} [${this.genDotAttrs(attrs)}];`);
     }
     instructions.push('}');
     return instructions.join('\n');
