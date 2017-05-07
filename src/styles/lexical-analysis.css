@@ -1,0 +1,91 @@
+@import "./common/global";
+@import "./common/layout";
+@import "./common/section";
+@import "./components/resizer";
+@import "./components/editor/variables";
+@import "./components/editor/error-marker";
+@import "./components/media-controls";
+@import "./components/automata";
+
+.main-frame {
+  height: 100%;
+  display: flex;
+  padding-bottom: 42px;
+}
+
+.panel-left {
+  position: relative;
+  width: 415px;
+  border-right: 1px solid #dfe2e5;
+}
+
+.panel-right {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-dfa {
+  /* cursor: grab; */
+  cursor: default;
+  user-select: none;
+
+  &.js-dragging {
+    cursor: grabbing;
+  }
+}
+
+.graph-overlay {
+  z-index: 405;
+}
+
+.panel-resizer > .resizer {
+  z-index: 406;
+}
+
+.panel-lexical {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-left: 1px solid #dfe2e5;
+}
+
+.editor-rules,
+.editor-code {
+  &.ace_editor {
+    font-size: 14px;
+    font-family: var(--editor-font-family);
+  }
+}
+
+.section-rules,
+.section-dfa {
+  height: 100%;
+}
+
+.section-rules {
+  position: absolute;
+  width: 100%;
+  z-index: 401;
+  background-color: #fff;
+  border-right: 1px solid #dfe2e5;
+  box-sizing: content-box;
+  left: -100%;
+  transition: left 0.25s ease-out;
+
+  &.expanded {
+    left: 0;
+  }
+}
+
+.section-code {
+  height: 200px;
+  max-height: 100%;
+  border-bottom: 1px solid #dfe2e5;
+}
+
+.section-tokens {
+  flex: 1;
+}
