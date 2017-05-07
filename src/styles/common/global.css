@@ -4,7 +4,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -13,8 +14,12 @@ html, body {
 html {
   height: 100%;
 }
+
 body {
   min-height: 100%;
+
+  /* refer: https://github.com/zenozeng/fonts.css */
+  font-family: -apple-system, BlinkMacSystemFont, "Lato", "Open Sans", "Helvetica Neue", Helvetica, "Nimbus Sans L", Arial, "Liberation Sans", "PingFang SC", "Hiragino Sans GB", "Source Han Sans CN", "Source Han Sans SC", "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", "ST Heiti", SimHei, "WenQuanYi Zen Hei Sharp", sans-serif;
 }
 
 ::selection {

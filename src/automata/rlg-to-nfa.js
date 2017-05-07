@@ -31,8 +31,7 @@ export default class RLG2NFA {
     const lines = (regex_comment ? text.replace(regex_comment, '') : text).split(/\r|\n/);
 
     // merge lines
-    let i = 1;
-    while (i < lines.length) {
+    for (let i = 1; i < lines.length;) {
       const line = lines[i];
       if (!regex_produce.test(line) && (line.trim().slice(0, 1) == '|' || lines[i - 1].trim().slice(-1) == '|')) {
         lines[i - 1] += line;

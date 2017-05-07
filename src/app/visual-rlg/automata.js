@@ -10,7 +10,7 @@ const VizDFA = VizFactory.create();
 const $nfa = document.querySelector('.graph-nfa');
 const $dfa = document.querySelector('.graph-dfa');
 const $graph_overlay = document.querySelector('.graph-overlay');
-const $error = $graph_overlay.querySelector('.error-tip');
+const $error = $graph_overlay.querySelector('.message');
 
 let parsing = false;
 let drawing = false;
@@ -27,8 +27,9 @@ function update(text, rlg) {
       throw new Error((rlg ? 'Grammar' : 'Regular expression') + ' cannot be empty');
     }
 
-    $graph_overlay.classList.remove('js-error');
-    $graph_overlay.classList.add('js-loading');
+    $graph_overlay.classList.remove('error');
+    $graph_overlay.classList.add('show', 'loading');
+    $error.innerText = '';
 
     const nfa = (rlg ? RLG2NFA : Regex2NFA).transform(text, options);
     const dfa = DFA.from(nfa);
@@ -42,7 +43,7 @@ function update(text, rlg) {
 
     ]).then(([svg_nfa, svg_dfa]) => {
       drawing = false;
-      $graph_overlay.classList.remove('js-loading');
+      $graph_overlay.classList.remove('show', 'loading');
 
       $nfa.innerHTML = svg_nfa.slice(svg_nfa.indexOf('-->', 57) + 3); // remove <?xml...
       $dfa.innerHTML = svg_dfa.slice(svg_dfa.indexOf('-->', 57) + 3); // remove <?xml...
@@ -59,8 +60,8 @@ function update(text, rlg) {
 
   }).catch((e) => {
     parsing = false;
-    $graph_overlay.classList.remove('js-loading');
-    $graph_overlay.classList.add('js-error');
+    $graph_overlay.classList.remove('loading');
+    $graph_overlay.classList.add('show', 'error');
     $error.innerText = e.message || 'An error occurred while processing the graph.';
 
     throw e;

@@ -1,0 +1,113 @@
+@import "./common/global";
+@import "./common/layout";
+@import "./common/section";
+@import "./components/resizer";
+@import "./components/editor/variables";
+@import "./components/editor/error-marker";
+@import "./components/media-controls";
+@import "./components/automata";
+
+.main-frame {
+  height: 100%;
+  display: flex;
+  padding-bottom: 42px;
+}
+
+.panel-left {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #dfe2e5;
+}
+
+.panel-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-nfa {
+  height: 50%;
+  max-height: 100%;
+  border-bottom: 1px solid #dfe2e5;
+}
+
+.section-grammar,
+.section-dfa {
+  flex: 1;
+  min-height: 0;
+}
+
+.editor-text,
+.editor-text-input {
+  font-size: 18px;
+}
+
+.editor-grammar.ace_editor {
+  font-size: 14px;
+}
+
+.editor-grammar.ace_editor,
+.editor-text,
+.editor-text-input {
+  font-family: var(--editor-font-family);
+}
+
+.editor-text-input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #dfe2e5;
+  background-color: transparent;
+  padding: 5px 8px;
+
+  &:focus {
+    border-color: #2188ff;
+    outline: none;
+    box-shadow: inset 0 0 0 0.2em rgba(3, 102, 214, 0.3);
+  }
+
+  &[disabled] {
+    user-select: none;
+    box-shadow: inset 0 0 0 0.2em rgba(238, 238, 238, 0.8);
+  }
+}
+
+.editor-text .marker {
+  position: absolute;
+  top: 50%;
+  min-width: 1px;
+  height: 2em;
+  background-color: #c7e987;
+  z-index: -1;
+  margin-left: 9px;
+  display: none;
+  transform: translateY(-50%);
+  transition: left 0.25s ease-out, width 0.25s;
+
+  &.show {
+    display: block;
+  }
+}
+
+.graph-nfa,
+.graph-dfa {
+  /* cursor: grab; */
+  cursor: default;
+  user-select: none;
+
+  &.js-dragging {
+    cursor: grabbing;
+  }
+}
+
+.graph-overlay {
+  z-index: 405;
+}
+
+.panel-resizer > .resizer {
+  z-index: 406;
+}

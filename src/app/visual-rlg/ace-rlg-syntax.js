@@ -1,4 +1,4 @@
-import ace from 'ace-builds/src-noconflict/ace';
+import ace from '../../components/ace';
 
 let Mode;
 let HighlightRules;
@@ -10,7 +10,7 @@ const Rules = {
       regex: /\$/,
     },
     {
-      token: 'comment.line',
+      token: 'comment',
       regex: /#.*$/,
     },
     {

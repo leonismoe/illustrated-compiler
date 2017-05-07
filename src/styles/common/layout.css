@@ -1,0 +1,41 @@
+@import "./topbar";
+
+body {
+  height: 100%;
+}
+
+.page-layout {
+  height: 100%;
+  position: relative;
+  padding-top: 36px;
+  overflow-x: hidden;
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+
+  &,
+  & .container {
+    height: 36px;
+    line-height: 36px;
+  }
+}
+
+.topbar-menu > .item,
+.topbar-menu > .right > .item {
+  font-size: 16px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.footer {
+  width: 100%;
+  height: 42px;
+  line-height: 42px;
+  position: fixed;
+  bottom: 0;
+  background-color: #1b1c1d;
+  color: #fff;
+  overflow: hidden;
+}
