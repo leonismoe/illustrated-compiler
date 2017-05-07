@@ -17,6 +17,8 @@ const defaultOptions = {
 const hexdigit = /[0-9a-fA-F]/;
 const octdigit = /[0-7]/;
 
+const global_regexp_cache = Object.create(null);
+
 export default class Regex2NFA {
 
   constructor(options) {
@@ -375,8 +377,23 @@ export default class Regex2NFA {
     for (let token of tokens) {
       if (token.type == 'char' || token.type == 'range') {
         const begin = nfa.addState();
-        const accept = token.value[0] == '\\' || token.type == 'range' ? new RegExp(`[${token.value}]`) : token.value;
-        const label = token.type == 'range' ? `[${token.value}]` : (token.value[0] == '\\' ? token.value[0] : escape(token.value, ['escape-sequence', 'space-open-box']));
+        const accept = (() => {
+          let result = token.value;
+          let regex = null;
+          if (result[0] == '\\') {
+            regex = result;
+          } else if (token.type == 'range') {
+            regex = `[${token.value}]`;
+          }
+          if (regex) {
+            result = global_regexp_cache[regex];
+            if (!result) {
+              result = global_regexp_cache[regex] = new RegExp(regex);
+            }
+          }
+          return result;
+        })();
+        const label = token.type == 'range' ? `[${token.value}]` : (token.value[0] == '\\' ? this.character_class_desc(token.value) : escape(token.value, ['escape-sequence', 'space-open-box']));
         const edge = nfa.addEdge(begin, null, { accept, label, text: token.value });
         stack.push({ entry: begin, edges: [edge], simple: true });
 
@@ -538,6 +555,18 @@ export default class Regex2NFA {
     }
 
     return nfa;
+  }
+
+  character_class_desc(val) {
+    switch (val) {
+      case '\\d': return 'digit';
+      case '\\D': return 'non-digit';
+      case '\\w': return 'word';
+      case '\\W': return 'non-word';
+      case '\\s': return 'whitespace';
+      case '\\S': return 'non-whitespace';
+      default: return val;
+    }
   }
 
   inspect_tokens(tokens) {
