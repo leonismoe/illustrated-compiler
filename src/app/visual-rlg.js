@@ -2,13 +2,13 @@ import '../styles/visual-rlg.css';
 
 import debounce from 'lodash/debounce';
 
-import Automata from './visual-rlg/automata';
-import Editor from './visual-rlg/rlg-editor';
-import MediaControls from './visual-rlg/media-controls';
 import VisualDFA from '../automata/visual-dfa';
-import VisualScanner from './visual-rlg/visual-scanner';
+import MediaControls from '../components/media-controls';
+import VisualScanner from '../components/visual-scanner';
 import Resizer from '../components/resizer';
 
+import Automata from './visual-rlg/automata';
+import Editor from './visual-rlg/rlg-editor';
 
 // ============================================================
 // Configurations
@@ -54,11 +54,14 @@ Editor.getSession().on('change', debounce(() => {
 }, 500));
 
 function updateAutomata(text) {
+  $text.setAttribute('disabled', 'disabled');
+  controls.setController(null);
   return Automata.update(text, 'rlg')
     .then(([nfa, dfa]) => {
       const vdfa = new VisualDFA(dfa, $dfa);
       controls.setController(new VisualScanner(vdfa, $marker, text_input_font));
       $text.value = '';
+      $text.removeAttribute('disabled');
     }, function(e) {});
 }
 
@@ -70,6 +73,12 @@ const getBoolAttr = (node, property) => {
   const value = node.getAttribute(property);
   return value == 'true' || value == property;
 };
+
+$text.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || (e.keyCode || e.which) == 13) {
+    $text.blur();
+  }
+}, false);
 
 $text.addEventListener('change', (e) => {
   if ($text.value) {
