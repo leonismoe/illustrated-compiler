@@ -13,6 +13,11 @@ ace.define(
       this.$rules = {
         start: [
           {
+            include: 'regexp',
+          },
+        ],
+        regexp: [
+          {
             token: 'keyword.control.anchor.regexp',
             regex: /\\[bB]|\^|\$/,
           },
@@ -22,23 +27,27 @@ ace.define(
           },
           {
             token: 'keyword.operator.quantifier.regexp',
-            regex: /[?+*]|\{(\d+,\d+|\d+,|,\d+|\d+)\}\??/,
+            regex: /[?+*]|\{(?:\d+,\d+|\d+,|,\d+|\d+)\}\??/,
           },
           {
             token: 'keyword.operator.or.regexp',
             regex: /\|/,
           },
           {
-            token: ['punctuation.definition.group.regexp', 'punctuation.definition.group.assertion.regexp', 'meta.assertion.look-ahead.regexp', 'meta.assertion.negative-look-ahead.regexp'],
-            regex: /(\()((\?=)|(\?!))/,
+            token: [
+              'punctuation.definition.group.regexp',
+              'meta.assertion.look-ahead.regexp',
+              'meta.assertion.negative-look-ahead.regexp',
+            ],
+            regex: /(\()(?:(\?=)|(\?!))/,
             push: [
-              {
-                include: 'start',
-              },
               {
                 token: 'punctuation.definition.group.regexp',
                 regex: /\)/,
                 next: 'pop',
+              },
+              {
+                include: 'regexp',
               },
               {
                 defaultToken: 'meta.group.assertion.regexp',
@@ -46,45 +55,50 @@ ace.define(
             ],
           },
           {
-            token: ['punctuation.definition.group.capture.regexp'],
-            regex: /\((\?:)?/,
+            token: 'punctuation.definition.group.regexp',
+            regex: /\((?:\?:)?/,
             push: [
-              {
-                include: 'start',
-              },
               {
                 token: 'punctuation.definition.group.regexp',
                 regex: /\)/,
                 next: 'pop',
               },
               {
-                defaultToken: 'punctuation.definition.group.regexp',
+                include: 'regexp',
               },
+              {
+                defaultToken: 'meta.group.regexp',
+              }
             ],
           },
           {
-            token: ['punctuation.definition.character-class.regexp', 'keyword.operator.negation.regexp'],
-            regex: /(\[)(\^)?/,
+            token: [
+              'punctuation.definition.character-class.regexp',
+              'keyword.operator.negation.regexp',
+            ],
+            regex: /(\[)((?:\^)?)/,
             push: [
+              {
+                token: 'punctuation.definition.character-class.regexp',
+                regex: /\]/,
+                next: 'pop',
+              },
               {
                 token: [
                   'constant.other.character-class.range.regexp',
                   'constant.character.numeric.regexp',
                   'constant.character.control.regexp',
                   'constant.character.escape.backslash.regexp',
+                  'constant.other.character-class.range.regexp',
+                  'constant.other.character-class.range.regexp',
                   'constant.character.numeric.regexp',
                   'constant.character.control.regexp',
-                  'constant.character.escape.backslash.regexp'
+                  'constant.character.escape.backslash.regexp',
                 ],
-                regex: /((?:[^\]\r\n]|(\\(?:[0-7]{3}|x[0-9a-fA-F][0-9a-fA-F]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))|(\\c[A-Z])|(\\.))\-(?:[^\]\\]|(\\(?:[0-7]{3}|x[0-9a-fA-F][0-9a-fA-F]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))|(\\c[A-Z])|(\\.)))/,
+                regex: /(?:(.)|(\\(?:[0-7]{3}|x[\da-fA-F][\da-fA-F]|u[\da-fA-F][\da-fA-F][\da-fA-F][\da-fA-F]))|(\\c[A-Z])|(\\.))(\-)(?:([^\]\\])|(\\(?:[0-7]{3}|x[\da-fA-F][\da-fA-F]|u[\da-fA-F][\da-fA-F][\da-fA-F][\da-fA-F]))|(\\c[A-Z])|(\\.))/,
               },
               {
                 include: 'regex-character-class',
-              },
-              {
-                token: 'punctuation.definition.character-class.regexp',
-                regex: /\]/,
-                next: 'pop',
               },
               {
                 defaultToken: 'constant.other.character-class.set.regexp',
@@ -92,35 +106,27 @@ ace.define(
             ],
           },
           {
-            token: 'punctuation.definition.group.regexp',
-            regex: /\)/,
-          },
-          {
-            token: 'punctuation.definition.character-class.regexp',
-            regex: /\]/,
-          },
-          {
             include: 'regex-character-class',
           },
         ],
         'regex-character-class': [
           {
-            token: 'constant.other.escape.character-class.regexp',
-            regex: /\\[wWsSdDtrnvf]|\./,
+            token: 'constant.character.character-class.regexp',
+            regex: /\\[wWsSdD]|\./,
           },
           {
-            token: 'constant.character.escape.numeric.regexp',
-            regex: /\\([0-7]{3}|x[0-9a-fA-F][0-9a-fA-F]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])/,
+            token: 'constant.character.numeric.regexp',
+            regex: /\\(?:[0-7]{3}|x[\da-fA-F][\da-fA-F]|u[\da-fA-F][\da-fA-F][\da-fA-F][\da-fA-F])/,
           },
           {
-            token: 'constant.character.escape.control.regexp',
+            token: 'constant.character.control.regexp',
             regex: /\\c[A-Z]/,
           },
           {
             token: 'constant.character.escape.backslash.regexp',
             regex: /\\./,
           },
-        ]
+        ],
       };
       this.normalizeRules();
     };
@@ -168,15 +174,10 @@ ace.define(
       this.HighlightRules = function () {
         RegexHighlightRules.apply(this);
 
-        this.$rules = {
-          start: [
-            {
-              token: 'comment.regexp',
-              regex: /\/\/.*$/,
-            },
-            ...this.$rules.start,
-          ],
-        };
+        this.$rules.start.unshift({
+          token: 'comment.regexp',
+          regex: /\/\/.*$/,
+        });
       };
       oop.inherits(this.HighlightRules, RegexHighlightRules);
     };

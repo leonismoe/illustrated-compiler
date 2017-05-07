@@ -1,4 +1,4 @@
-import VisualDFA from '../../automata/visual-dfa';
+import VisualDFA from '../automata/visual-dfa';
 import TextMarker from './text-marker';
 
 export default class VisualScanner {
