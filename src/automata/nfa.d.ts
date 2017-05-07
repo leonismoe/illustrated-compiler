@@ -9,7 +9,11 @@ declare class NFA extends Graph {
 
   isTerminal(vertex: Vertex): boolean;
   minimize(): void;
-  toDOT(name?: string, noarrow?: boolean): string;
+  toDOT(name?: string, options?: object): string;
+
+  mount(nfa: NFA, edge: Edge): void;
+  mount(nfa: NFA, props: object, state?: Vertex): void;
+  mount(nfa: NFA, accept?: string | number | ((val: string) => boolean) | RegExp | null, state?: Vertex): void;
 
   addState(): Vertex;
   addState(state: Vertex): Vertex;

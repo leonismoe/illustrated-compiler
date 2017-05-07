@@ -13,9 +13,13 @@ declare class DFA extends NFA {
 
   reset(): void;
   next(val: string): any;
-  toDOT(name?: string, noarrow?: boolean): string;
+  toDOT(name?: string, options?: object): string;
 
-  static from(object: NFA): DFA;
+  mount(dfa: DFA, edge: Edge): void;
+  mount(dfa: DFA, props: object, state?: Vertex): void;
+  mount(dfa: DFA, accept: string | number | ((val: string) => boolean) | RegExp | null, state?: Vertex): void;
+
+  static from(object: NFA, options?: object): DFA;
 
 }
 
