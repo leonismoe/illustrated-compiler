@@ -15,6 +15,7 @@ module.exports = {
   entry: {
     app: './app.js',
     'visual-rlg': './app/visual-rlg.js',
+    'lexical-analysis': './app/lexical-analysis.js',
   },
   externals,
   module: {

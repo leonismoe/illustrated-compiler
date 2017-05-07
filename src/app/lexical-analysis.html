@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Lexical Analysis</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- inject external styles -->
+  <link rel="stylesheet" type="text/css" href="/assets/lexical-analysis.bundle.css">
+</head>
+<body>
+  <div class="page-layout">
+    <div class="topbar">
+      <div class="container">
+        <div class="topbar-menu">
+          <div class="item"><strong>Illustrated Compiler</strong></div>
+          <div class="item"><strong>Lexical Analysis</strong></div>
+          <div class="right">
+            <a class="item" href="#"><i class="fa fa-cog"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-frame">
+      <div class="panel-left">
+        <div class="section section-rules expanded">
+          <div class="section-title">Rules</div>
+          <div class="section-body editor-rules" id="editor-rules"></div>
+        </div>
+
+        <div class="panel-lexical">
+          <div class="section section-code">
+            <div class="section-title">Code</div>
+            <div class="section-body editor-code" id="editor-code"></div>
+          </div>
+
+          <div class="resizer-wrapper horizontal"><div class="resizer"></div></div>
+
+          <div class="section section-tokens">
+            <div class="section-title">Tokens</div>
+            <div class="section-body panel-tokens" id="panel-tokens"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="resizer-wrapper vertical panel-resizer"><div class="resizer"></div></div>
+
+      <div class="panel-right">
+        <div class="section section-dfa">
+          <div class="section-title">DFA</div>
+          <div class="section-body graph-dfa use-arrow" id="graph-dfa"></div>
+        </div>
+        <div class="section-overlay graph-overlay inverted animate show loading">
+          <div class="loader"></div>
+          <div class="message"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="container media-controls">
+        <div class="speed-control"></div>
+        <div class="progress-control">
+          <ul class="play-control disabled">
+            <li><a href="#" class="beginning" title="Go to beginning"></a></li>
+            <li><a href="#" class="step-backward" title="Step backward"></a></li>
+            <li><a href="#" class="btn-play-pause larger play anim-restart" title="Play">
+              <div class="icon">
+                <i class="part-a"></i>
+                <i class="part-b"></i>
+              </div>
+            </a></li>
+            <li><a href="#" class="step-forward" title="Step forward"></a></li>
+            <li><a href="#" class="ending" title="Go to end"></a></li>
+          </ul>
+          <div class="progress-bar"></div>
+        </div>
+        <ul class="footer-links right">
+          <li><a href="#">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="config-panel">
+
+  </div>
+
+  <!-- inject external scripts -->
+  <script src="/node_modules/ace-builds/src-noconflict/ace.js"></script>
+  <script type="text/javascript" src="/assets/lexical-analysis.bundle.js"></script>
+</body>
+</html>
