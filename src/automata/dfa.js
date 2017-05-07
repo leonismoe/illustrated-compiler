@@ -48,6 +48,9 @@ export default class DFA extends NFA {
     this._done = false;
     this._matches = [];
     this._state = this.get('entry');
+    this._match_path = [];
+    this._wildcard = [];
+    this._edge_met = {};
   }
 
   next(val) {
@@ -73,7 +76,7 @@ export default class DFA extends NFA {
             transition = edge;
             break;
           }
-        } else if (accept === val || accept === '') {
+        } else if (accept === val || (accept === '' || accept === null) && (this._props.dotall || val != '\n')) {
           transition = edge;
           break;
         }
@@ -84,8 +87,26 @@ export default class DFA extends NFA {
       if (this._state.get('terminal')) {
         return { state: this._state, edge: null, done: true, error: '' };
       }
+      if (this._wildcard.length) {
+        // TODO: backtrack
+        const last_wildcard_edge = this._wildcard.pop();
+        let steps = 0, edge;
+        while ((edge = this._match_path.pop()) && edge != last_wildcard_edge) {
+          ++steps;
+        }
+        if (edge) {
+          this._state = this.last_wildcard_edge.from;
+          const backtrack = [this._state];
+            // let last_step = this._dfa.next(str[i]);
+            // if (last_step.done) {
+            //   //
+            // }
+        }
+      }
       return { state: this._state, edge: null, done: true, error: 'No available transitions' };
     }
+    this._match_path.push(transition);
+    this._edge_met[transition.id] = true;
     this._matches.push(val);
     this._state  = transition.to;
     const greedy = this._state.get('greedy', this._props.greedy);
