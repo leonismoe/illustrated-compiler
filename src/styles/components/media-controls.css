@@ -1,0 +1,254 @@
+.footer > .media-controls {
+  padding: 0 0.95rem;
+  text-align: center;
+  position: relative;
+
+  & > .speed-control {
+    left: 0;
+    top: 0;
+  }
+
+  & .play-control,
+  & .footer-links {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    font-size: 0;
+
+    & > li {
+      display: inline-block;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    & a {
+      color: #ddd;
+      text-decoration: none;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  & .play-control {
+    user-select: none;
+
+    & > li {
+      overflow: hidden;
+      max-width: 42px;
+    }
+
+    & a {
+      display: block;
+      width: 42px;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      &:active {
+        background-color: rgba(255, 255, 255, 0.15);
+      }
+
+      &.larger {
+        font-size: 1.5em;
+      }
+    }
+
+    &.disabled a,
+    & a.disabled {
+      background: none;
+      color: #777;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    &.disabled .btn-play-pause .icon,
+    & .btn-play-pause.disabled .icon {
+      & .part-a,
+      & .part-b {
+        background-color: #777;
+      }
+    }
+
+    & .beginning,
+    & .step-backward,
+    & .play,
+    & .pause,
+    & .restart,
+    & .stop,
+    & .step-forward,
+    & .ending {
+      font-family: FontAwesome;
+    }
+
+    & .beginning::before {
+      content: "\f049";
+    }
+
+    & .step-backward::before {
+      content: "\f048";
+    }
+
+    & .restart::before {
+      content: "\f01e";
+    }
+
+    & .stop::before {
+      content: "\f04d";
+    }
+
+    & .step-forward::before {
+      content: "\f051";
+    }
+
+    & .ending::before {
+      content: "\f050";
+    }
+
+    & .btn-play-pause .icon {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      overflow: hidden;
+      top: calc((42px - 18px) / 2);
+      margin: 0 auto;
+      opacity: 1;
+      transition: transform 0.3s ease-in-out, opacity 0.3s linear;
+
+      &::before,
+      &::after,
+      & .part-a,
+      & .part-b {
+        transition: transform 0.3s ease-in-out;
+      }
+
+      & .part-a,
+      & .part-b {
+        display: block;
+        height: 50%;
+        background-color: #ddd;
+      }
+
+      & .part-a {
+        transform-origin: 50% 0;
+      }
+
+      & .part-b {
+        transform-origin: 50% 100%;
+      }
+
+      &::before,
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: calc(2.4 / 2 * 18px);
+        height: calc(2.4 / 5 * 18px);
+        background-color: #1b1c1d;
+        z-index: 1;
+      }
+
+      &::before {
+        bottom: 18px;
+        transform-origin: 0 100%;
+      }
+
+      &::after {
+        top: 18px;
+        transform-origin: 0 0;
+      }
+    }
+
+    & .play .icon,
+    & .pause .icon {
+      display: block;
+    }
+
+    & .btn-play-pause {
+      position: relative;
+      height: 42px;
+
+      &:hover .icon .part-a,
+      &:hover .icon .part-b {
+        background-color: #fff;
+      }
+
+      &.play {
+        & .icon::before {
+          transform: rotate(0.46364760900080611621425623146121rad);
+        }
+
+        & .icon::after {
+          transform: rotate(-0.46364760900080611621425623146121rad);
+        }
+      }
+
+      &.pause {
+        & .icon {
+          transform: rotate(90deg) scale(1);
+        }
+
+        & .part-a,
+        & .part-b {
+          transform: scaleY(0.66666666666666666666666666666667);
+        }
+      }
+
+      &:hover .icon::before,
+      &:hover .icon::after {
+        background-color: color(#1b1c1d whiteness(+10%));
+      }
+
+      &:active .icon::before,
+      &:active .icon::after {
+        background-color: color(#1b1c1d whiteness(+15%));
+      }
+
+      &.anim-restart {
+        &::before {
+          content: "\f01e";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 2;
+          opacity: 0;
+          transform: scale(2);
+          transition: opacity 0.3s linear, transform 0.3s ease-out;
+        }
+
+        &.restart::before {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        &.restart .icon {
+          opacity: 0;
+          transform: scale(0);
+        }
+
+        &.pause.restart .icon {
+          transform: rotate(90deg) scale(0);
+        }
+      }
+    }
+  }
+
+  & > .footer-links {
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    & > li {
+      padding: 0 0.75em;
+    }
+
+    & > li > a:active,
+    & > li > a:hover {
+      text-decoration: underline;
+    }
+  }
+}

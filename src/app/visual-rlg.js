@@ -1,4 +1,4 @@
-import '../styles/visual-rlg/index.css';
+import '../styles/visual-rlg.css';
 
 import debounce from 'lodash/debounce';
 

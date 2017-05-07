@@ -15,7 +15,6 @@ let resizer = null;
 let target = null;
 let property = null;
 let options = null;
-let maxsize = null;
 
 document.addEventListener('mousedown', function(e) {
   if (target || e.button != 0) {
@@ -28,7 +27,6 @@ document.addEventListener('mousedown', function(e) {
       target = instance.$target;
       property = instance.property;
       options = instance.options;
-      maxsize = instance.maxsize;
       initialSize = property == 'width' ? target.offsetWidth : target.offsetHeight;
       initialX = e.pageX;
       initialY = e.pageY;
@@ -101,7 +99,6 @@ export default class Resizer {
     this.direction = this.$resizer.className.indexOf('horizontal') > -1 ? 'horizontal' : 'vertical';
     this.property  = this.direction == 'vertical' ? 'width' : 'height';
     this.adjusting = false;
-    this.maxsize   = maxsize;
     this.options   = options;
     if (typeof this.options.relative == 'string') {
       this.options.relative = document.querySelector(this.options.relative);
