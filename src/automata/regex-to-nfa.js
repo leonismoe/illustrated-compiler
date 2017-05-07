@@ -412,6 +412,8 @@ export default class Regex2NFA {
             regex = result;
           } else if (token.type == 'range') {
             regex = `[${token.value}]`;
+          } else if (token.value == '.' && token.text == '.') {
+            result = '';
           }
           if (regex) {
             result = global_regexp_cache[regex];
@@ -421,7 +423,18 @@ export default class Regex2NFA {
           }
           return result;
         })();
-        const label = token.type == 'range' ? `[${token.value}]` : (token.value[0] == '\\' ? this.character_class_desc(token.value) : escape(token.value, ['escape-sequence', 'space-open-box']));
+        const label = (() => {
+          if (accept instanceof RegExp) {
+            if (token.value[0] == '\\') {
+              return this.character_class_desc(token.value);
+            }
+            return accept.source;
+          }
+          if (accept === '') {
+            return 'any';
+          }
+          return escape(token.value, ['escape-sequence', 'space-open-box']);
+        })();
         const edge = nfa.addEdge(begin, null, { accept, label, text: token.value });
         stack.push({ entry: begin, edges: [edge], simple: true });
 
