@@ -11,6 +11,7 @@ const defaultOptions = {
   max_repeat_group: 2,
   minimize_circle: false,
   simplify_infinity_repeats: true,
+  final_state_type: null,
 };
 
 const hexdigit = /[0-9a-fA-F]/;
@@ -22,8 +23,8 @@ export default class Regex2NFA {
     this.options = Object.assign({}, defaultOptions, options);
   }
 
-  static transform(regex) {
-    return (new Regex2NFA()).transform(regex);
+  static transform(regex, options) {
+    return (new Regex2NFA(options)).transform(regex);
   }
 
   transform(regex) {
@@ -526,6 +527,9 @@ export default class Regex2NFA {
     }
 
     const final_state = nfa.addState({ label: this.options.final_state_symbol, terminal: true });
+    if (this.options.final_state_type !== null) {
+      final_state.set('type', this.options.final_state_type);
+    }
     const entry_state = stack[0].entry;
     entry_state.set('label', this.options.initial_state_symbol);
     nfa.set('entries', [entry_state]);

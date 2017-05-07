@@ -32,14 +32,14 @@ function update(text, rlg) {
     $error.innerText = '';
 
     const nfa = (rlg ? RLG2NFA : Regex2NFA).transform(text, options);
-    const dfa = DFA.from(nfa);
+    const dfa = DFA.from(nfa, { preserve_nfa_mapping: true });
 
     parsing = false;
     drawing = true;
 
     Promise.all([
-      VizNFA(nfa.toDOT('NFA', true)),
-      VizDFA(dfa.toDOT('DFA', true)),
+      VizNFA(nfa.toDOT('NFA', { noarrow: true })),
+      VizDFA(dfa.toDOT('DFA', { noarrow: true })),
 
     ]).then(([svg_nfa, svg_dfa]) => {
       drawing = false;
