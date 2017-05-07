@@ -151,10 +151,14 @@ export declare class Edge extends Base {
   to: Vertex | null;
   graph: Graph | null;
 
+  issetId: boolean;
   label: string;
   labelOrId: string | number;
 
-  remove: void;
-  destroy: void;
+  remove(): void;
+  destroy(): void;
+
+  bfs(callback: (currentValue: Edge, previous: any) => any, initialValue?: any, condition?: (current: Edge) => boolean): any;
+  dfs(callback: (currentValue: Edge, previous: any) => any, initialValue?: any, condition?: (current: Edge) => boolean): any;
 
 }
