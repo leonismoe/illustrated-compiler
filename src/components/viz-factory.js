@@ -1,4 +1,4 @@
-import VizWorker from '../components/viz.worker';
+import VizWorker from './viz.worker';
 
 export default class VizFactory {
 
