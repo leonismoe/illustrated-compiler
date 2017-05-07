@@ -104,8 +104,10 @@ export default class Graph extends Base {
     if (typeof vertex == 'undefined' || vertex === null) {
       return false;
     }
-    const id = typeof vertex == 'string' || typeof vertex == 'number' ? vertex : vertex.id;
-    return !!this._vertex_map[id];
+    if (typeof vertex == 'string' || typeof vertex == 'number') {
+      return !!this._vertex_map[vertex];
+    }
+    return vertex == this._vertex_map[vertex.id];
   }
 
   removeVertex(vertex) {
@@ -137,11 +139,6 @@ export default class Graph extends Base {
   // addEdge(id, from, to)
   // addEdge(from, to, props)
   // addEdge(id, from, to, props)
-  /// addEdge(edges: Edge): Edge;
-  /// addEdge(from: Vertex | null, to: Vertex | null): Edge;
-  /// addEdge(id: string | number, from: Vertex | null, to: Vertex | null): Edge;
-  /// addEdge(from: Vertex | null, to: Vertex | null, props: Object): Edge;
-  /// addEdge(id: string | number, from: Vertex | null, to: Vertex | null, props: Object): Edge;
   addEdge(edge, from, to, props) {
     if (!(edge instanceof Edge)) {
       if (!to) { // addEdge(from, to)
@@ -164,6 +161,8 @@ export default class Graph extends Base {
         const id = edge;
         edge = new Edge(id, from, to, props);
       }
+    } else if (!edge.issetId) {
+      throw new Error('Edge\'s id is required');
     }
     if (!this._edge_map[edge.id]) {
       if (edge.from && !this._vertex_map[edge.from.id]) {
@@ -184,8 +183,10 @@ export default class Graph extends Base {
     if (typeof edge == 'undefined' || edge === null) {
       return false;
     }
-    const id = typeof edge == 'string' || typeof edge == 'number' ? edge : edge.id;
-    return !!this._edge_map[id];
+    if (typeof edge == 'string' || typeof edge == 'number') {
+      return !!this._edge_map[edge];
+    }
+    return edge.issetId && edge == this._edge_map[edge.id];
   }
 
   removeEdge(edge) {

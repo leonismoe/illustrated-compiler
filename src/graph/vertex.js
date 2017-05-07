@@ -53,6 +53,9 @@ export default class Vertex extends Base {
     if (!(edge instanceof Edge)) {
       throw new TypeError('Related edge must be a Edge instance');
     }
+    if (!edge.issetId) {
+      throw new Error('Edge\'s id is required');
+    }
     if (this._edges_map[edge.id]) {
       return;
     }

@@ -7,7 +7,8 @@ export default class Edge extends Base {
   constructor(id, from, to, props) {
     super(props);
 
-    if (typeof id != 'number' && typeof id != 'string') {
+    const id_isset = id !== null && id !== undefined && id !== '';
+    if (id_isset && typeof id != 'number' && typeof id != 'string') {
       throw new TypeError('Edge ID can only be a number or string');
     }
 
@@ -20,8 +21,8 @@ export default class Edge extends Base {
     this._to = to;
     this._graph = null;
 
-    if (from) from.addEdge(this);
-    if (to)   to.addEdge(this);
+    if (id_isset && from) from.addEdge(this);
+    if (id_isset && to)   to.addEdge(this);
   }
 
   set(name, value) {
@@ -31,6 +32,10 @@ export default class Edge extends Base {
       this._graph.emit('edge.update', this, name);
     }
     return result;
+  }
+
+  get issetId() {
+    return this._id !== null && this._id !== undefined && this._id !== '';
   }
 
   get from() {
@@ -47,7 +52,7 @@ export default class Edge extends Base {
       this._from.removeEdge(this);
     }
     this._from = value;
-    if (value) {
+    if (value && this.issetId) {
       value.addEdge(this);
     }
 
@@ -72,7 +77,7 @@ export default class Edge extends Base {
       this._to.removeEdge(this);
     }
     this._to = value;
-    if (value) {
+    if (value && this.issetId) {
       value.addEdge(this);
     }
 
@@ -120,6 +125,38 @@ export default class Edge extends Base {
     this._from  = null;
     this._to    = null;
     this._props = null;
+  }
+
+  bfs(callback, initialValue, condition) {
+    const visited = Object.create(null);
+    let stack = [this];
+    let edge;
+    let result = initialValue;
+    while (edge = stack.shift()) { // eslint-disable-line no-cond-assign
+      if (visited[edge.id]) continue;
+      if (condition && condition(edge) || !condition) {
+        if (edge.to) stack = stack.concat(edge.to.out);
+      }
+      result = callback(edge, result);
+      visited[edge.id] = true;
+    }
+    return result;
+  }
+
+  dfs(callback, initialValue, condition) {
+    const visited = Object.create(null);
+    let stack = [this];
+    let edge;
+    let result = initialValue;
+    while (edge = stack.pop()) { // eslint-disable-line no-cond-assign
+      if (visited[edge.id]) continue;
+      if (condition && condition(edge) || !condition) {
+        if (edge.to) stack = stack.concat(edge.to.out);
+      }
+      result = callback(edge, result);
+      visited[edge.id] = true;
+    }
+    return result;
   }
 
 }
