@@ -306,11 +306,22 @@ export default class Regex2NFA {
 
     let parsed_length = 0;
     let last_char = null;
+    let is_beginning = true;
     for (let token of tokens) {
       if (token.type == 'group') {
+        is_beginning = false;
+
         if (token.value == '(') {
+          let top;
+          if (stack.length > 0 && (top = stack[stack.length - 1]) && (top.type == 'repeat' || top.type == 'concat')) {
+            stack.pop();
+            append(top);
+          }
+          append({ type: 'concat', value: '', offset: parsed_length });
+
           stack.push(token);
           last_char = null;
+          is_beginning = true;
 
         } else {
           let top;
@@ -335,21 +346,38 @@ export default class Regex2NFA {
           throw new ParseError('Repeat too more', 0, parsed_length);
         }
 
+        let top;
+        if (stack.length > 0 && (top = stack[stack.length - 1]) && top.type == 'repeat') { // eslint-disable-line no-cond-assign
+          stack.pop();
+          append(top);
+        }
+
         last_char = null;
         stack.push(token);
 
       } else if (token.type == 'union') {
+        let top;
+        if (stack.length > 0 && (top = stack[stack.length - 1]) && (top.type == 'repeat' || top.type == 'concat' || top.type == 'union')) { // eslint-disable-line no-cond-assign
+          stack.pop();
+          append(top);
+        }
+
         last_char = null;
         stack.push(token);
 
       } else {
         let top;
-        while (stack.length && (top = stack[stack.length - 1]) && top.type == 'repeat') {
+        if (stack.length > 0 && (top = stack[stack.length - 1]) && (top.type == 'repeat' || top.type == 'concat')) {
           stack.pop();
           append(top);
         }
+
+        if (!is_beginning) {
+          stack.push({ type: 'concat', value: '', offset: parsed_length });
+        }
+
         last_char = token;
-        stack.push({ type: 'concat', value: '', offset: parsed_length });
+        is_beginning = false;
         append(token);
       }
 
