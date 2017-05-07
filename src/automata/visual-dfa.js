@@ -10,7 +10,7 @@ const markerSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://w
 
 export default class VisualDFA {
 
-  constructor(object, container) {
+  constructor(object, container, options) {
     if (!object || !(object instanceof DFA)) {
       throw new Error('Object must be a DFA instance');
     }
@@ -20,8 +20,13 @@ export default class VisualDFA {
     this.$graph = this.$svg.querySelector('.graph');
 
     this._dfa = object;
-    window.dfa = object;
     this._state = null;
+    this._last_anim = null;
+    this._last_timer = null;
+
+    this._options = Object.assign({
+      duration: 800,
+    }, options);
 
     this._history = [];
 
@@ -127,19 +132,26 @@ export default class VisualDFA {
     }, false);
     this.$graph.appendChild($edge);
 
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       $from.setAttribute('class', 'node animate');
       $edge.setAttribute('stroke-dashoffset', -length);
-    }, 16);
+    });
 
     this._state = edge.to;
-    setTimeout(() => {
+    if (this._last_anim) {
+      this._last_anim();
+      clearTimeout(this._last_timer);
+    }
+
+    this._last_anim = () => {
       let classes = 'node animate highlight';
       if (item.done) {
         classes += item.error ? ' rejected' : ' resolved';
       }
       $to.setAttribute('class', classes);
-    }, 416);
+      this._last_anim = null;
+    };
+    this._last_timer = setTimeout(this._last_anim, this._options.duration / 2);
   }
 
   updateSVGdefs() {

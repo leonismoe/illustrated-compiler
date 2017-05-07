@@ -42,15 +42,18 @@
    * can't specify class name in DOT
    * https://github.com/ellson/graphviz/blob/3e6b92b1d24a6deb478140f2e1410bc98e6b4d9f/plugin/core/gvrender_core_svg.c#L302
    */
-  & ellipse:first-child {
-    fill: var(--sm-highlight-color);
-  }
 
   & ellipse {
+    fill: var(--sm-highlight-color);
     stroke: var(--sm-highlight-color);
 
     &:last-of-type {
+      fill: transparent;
       stroke-width: 2;
+    }
+
+    &:first-of-type {
+      fill: var(--sm-highlight-color);
     }
   }
 
@@ -59,7 +62,7 @@
   }
 
   &.resolved {
-    & ellipse:first-child {
+    & ellipse:first-of-type {
       fill: var(--sm-resolve-color);
     }
 
@@ -73,7 +76,7 @@
   }
 
   &.rejected {
-    & ellipse:first-child {
+    & ellipse:first-of-type {
       fill: var(--sm-reject-color);
     }
 
