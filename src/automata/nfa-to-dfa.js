@@ -1,7 +1,12 @@
 import NFA from './nfa';
 import DFA from './dfa';
 
-export default function NFA2DFA(object) {
+const defaults = {
+  preserve_nfa_mapping: false,
+  preserve_label: false,
+};
+
+export default function NFA2DFA(object, options) {
   if (!(object instanceof NFA)) {
     throw new TypeError('Source object is not a NFA');
   }
@@ -11,15 +16,20 @@ export default function NFA2DFA(object) {
     throw new RangeError('Could not construct DFA: no initial states found');
   }
 
+  options = Object.assign({}, defaults, options);
+
   const epsilon_symbol = object.get('epsilon');
   const terminals = object.terminals;
   const { accepts, labels } = get_accepts(object);
   const nfa_states = [ epsilon_closure(object.entries, epsilon_symbol) ];
 
   const dfa = new DFA();
-  const entry = dfa.addVertex({ 'nfa-mapping': map_to_id(nfa_states[0]), terminal: contain_terminal(terminals, nfa_states[0]) });
+  const entry = dfa.addVertex({ terminal: contain_terminal(terminals, nfa_states[0]) });
   dfa.set('entry', entry);
   dfa.set('nfa', object);
+  if (!options.preserve_nfa_mapping) {
+    entry.set('nfa-mapping', map_to_id(nfa_states[0]));
+  }
   const states = [entry];
 
   for (let i = 0; i < nfa_states.length; ++i) {
@@ -33,7 +43,11 @@ export default function NFA2DFA(object) {
       if (index < 0) {
         index = nfa_states.length;
         nfa_states.push(new_state);
-        states.push(dfa.addVertex({ 'nfa-mapping': map_to_id(new_state), terminal: contain_terminal(terminals, new_state) }));
+        const props = Object.assign({}, ...new_state.map(v => v.getProps()), { terminal: contain_terminal(terminals, new_state) }, options.preserve_label ? null : { label: null });
+        if (options.preserve_nfa_mapping) {
+          props['nfa-mapping'] = map_to_id(new_state);
+        }
+        states.push(dfa.addVertex(props));
       }
       dfa.addEdge(states[i], states[index], { accept, label });
     }
@@ -49,10 +63,15 @@ function append_if_not_exist(array, value) {
 }
 
 function epsilon_closure(states, epsilon) {
+  if (states.length == 0) {
+    return [];
+  }
   const result = states.slice();
+  const base = result[0];
+  const prop_match = (name, state) => base.isset(name) && state.isset(name) ? base.get(name) === state.get(name) : true;
   for (let vertex of result) {
     for (let edge of vertex.out) {
-      if (edge.get('accept') == epsilon) {
+      if (edge.to && epsilon === edge.get('accept') && prop_match('type', edge.to) && prop_match('greedy', edge.to)) {
         append_if_not_exist(result, edge.to);
       }
     }
@@ -62,14 +81,20 @@ function epsilon_closure(states, epsilon) {
 
 function move_closure(states, move) {
   const result = [];
+  const is_regexp = move instanceof RegExp;
   for (let vertex of states) {
     for (let edge of vertex.out) {
-      if (edge.get('accept') == move) {
+      const accept = edge.get('accept');
+      if (edge.to && (accept == move || is_regexp && accept instanceof RegExp && compare_regexp(accept, move))) {
         append_if_not_exist(result, edge.to);
       }
     }
   }
   return result;
+}
+
+function compare_regexp(a, b) {
+  return a.source === b.source && a.flags === b.flags;
 }
 
 function get_terminals(nfa) {
