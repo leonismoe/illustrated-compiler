@@ -22,9 +22,9 @@ function update(text, rlg) {
     }
     parsing = true;
 
-    if (!text) {
+    if (!text && rlg) {
       parsing = false;
-      throw new Error((rlg ? 'Grammar' : 'Regular expression') + ' cannot be empty');
+      throw new Error('Grammar cannot be empty');
     }
 
     $graph_overlay.classList.remove('error');
@@ -63,6 +63,7 @@ function update(text, rlg) {
     $graph_overlay.classList.remove('loading');
     $graph_overlay.classList.add('show', 'error');
     $error.innerText = e.message || 'An error occurred while processing the graph.';
+    console.log(e); // eslint-disable-line no-console
 
     throw e;
   });

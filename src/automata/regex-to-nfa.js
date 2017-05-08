@@ -7,8 +7,8 @@ const defaultOptions = {
   epsilon_label: 'ε',
   initial_state_symbol: 'X',
   final_state_symbol: 'Y',
-  max_repeat_count: 8,
-  max_repeat_group: 2,
+  max_repeat_count: 12,
+  max_repeat_group: 6,
   minimize_circle: false,
   simplify_infinity_repeats: true,
   final_state_type: null,
@@ -51,7 +51,7 @@ export default class Regex2NFA {
           result = i;
           break;
         } else if (open && ch == open && !escaped) {
-          throw new ParseError(`Character "${open}" is not allowed between "${open}" and "${search}"`, 0, i);
+          throw new ParseError(`Character "${open}" is not allowed between "${open}" and "${search}"`, 0, i, 1);
         } else {
           escaped = false;
         }
@@ -61,6 +61,13 @@ export default class Regex2NFA {
 
     const tokens = [];
     const octs = [];
+
+    let is_beginning = true;
+    const insert_concat_token = (offset) => {
+      if (!is_beginning) {
+        tokens.push({ type: 'concat', value: '', text: '', offset });
+      }
+    };
 
     let escaping = false;
     let paren_count = 0;
@@ -84,7 +91,7 @@ export default class Regex2NFA {
           const temp = regex.substr(i + 1, 2);
           if (hexdigit.test(temp[0])) {
             if (!hexdigit.test(temp[1])) {
-              throw new ParseError('Invalid hexadecimal escape sequence', 0, i + 2);
+              throw new ParseError('Invalid hexadecimal escape sequence', 0, i + 2, 1);
             }
             ch += temp;
             i += 2;
@@ -97,7 +104,7 @@ export default class Regex2NFA {
           if (hexdigit.test(temp[0])) {
             for (let j = 1; j < 4; ++j) {
               if (!hexdigit.test(temp[j])) {
-                throw new ParseError('Invalid Unicode escape sequence', 0, i + 1 + j);
+                throw new ParseError('Invalid Unicode escape sequence', 0, i - 1, j + 3);
               }
             }
             ch += temp;
@@ -108,7 +115,7 @@ export default class Regex2NFA {
 
         } else if (/\d/.test(ch[1])) {
           if ((ch[1] | 0) >= 8) {
-            throw new ParseError('Back reference is not supported', 0, i + 1);
+            throw new ParseError('Back reference is not supported', 0, i, 1);
           }
 
           let temp = '';
@@ -129,7 +136,7 @@ export default class Regex2NFA {
           }
 
         } else if (ch[1] == 'b' || ch[1] == 'B') {
-          throw new ParseError('Boundary character "\\b" and "\\B" are not supported', 0, i + 1);
+          throw new ParseError('Boundary character "\\b" and "\\B" are not supported', 0, i - 1, 2);
 
         } else if ('tnvfrdDsSwW'.indexOf(ch[1]) < 0) {
           ch = ch[1];
@@ -137,6 +144,8 @@ export default class Regex2NFA {
       }
 
       if (escaped) {
+        insert_concat_token(i);
+        is_beginning = false;
         tokens.push({ type: 'char', value: ch, text: ch.length > 1 ? ch : '\\' + ch, offset: i });
         continue;
       }
@@ -152,26 +161,29 @@ export default class Regex2NFA {
           ++paren_count;
         }
         if (lookahead2 == '?=' || lookahead2 == '?!') {
-          throw new ParseError(`Quantifier "${lookahead2}" is not supported`, 0, i + 1);
+          throw new ParseError(`Quantifier "${lookahead2}" is not supported`, 0, i, 3);
         }
 
         const lookahead3 = regex.substr(i + 1, 3);
         if (lookahead3 == '?<=' || lookahead3 == '?<!') {
-          throw new ParseError('Lookbehind is not supported', 0, i + 1);
+          throw new ParseError('Lookbehind is not supported', 0, i, 4);
         }
 
+        insert_concat_token(i);
+        is_beginning = true;
         token = { type: 'group', value: '(', capture, offset: i };
 
       } else if (ch == ')') {
+        is_beginning = false;
         token = { type: 'group', value: ')', offset: i };
 
       } else if (ch == '[') {
         const offset = search_until(']', i + 1, len);
         if (offset < 0) {
-          throw new ParseError('Expecting "]", but reached EOF', 0, len);
+          throw new ParseError('Expecting "]", but reached EOF', 0, len, 0);
         }
         if (offset == i + 1) {
-          throw new ParseError('Expecting character list between "[" and "]", but nothing found', 0, i + 1);
+          throw new ParseError('Expecting character list between "[" and "]", but nothing found', 0, i, 2);
         }
         const range = regex.slice(i + 1, offset);
         ch = '[' + range + ']';
@@ -179,7 +191,7 @@ export default class Regex2NFA {
         try {
           new RegExp(ch); // throws
         } catch (e) {
-          throw new ParseError('Range out of order in character class', 0, i + 1);
+          throw new ParseError('Range out of order in character class', 0, i, offset + 1);
         }
         i = offset;
 
@@ -209,32 +221,60 @@ export default class Regex2NFA {
 
         if (range.length == 2) {
           if (range[0] > range[1]) {
-            throw new ParseError('Numbers out of order in {} quantifier', 0, i + 2 + ('' + range[0]).length);
+            throw new ParseError('Numbers out of order in {} quantifier', 0, i + 2 + ('' + range[0]).length, range[1].length);
           }
         } else if (range.length != 1 || !closed) {
           range = null;
         }
 
         if (range) {
-          if (range[0] == 0 && range[1] == 0) {
-            throw new ParseError('It\'s meaningless to repeat 0 times', 0, i + 1);
-          }
-          i += range[0].toString().length + 1;
-          if (range[1] && range[1] != Infinity) {
-            i += range[1].toString().length + 1;
-          } else if (range[1]) {
-            i += 1;
+          let delta = range[0].toString().length + 1;
+          if (range.length == 2) {
+            if (range[1] != Infinity) {
+              delta += range[1].toString().length;
+            }
+            delta += 1;
           }
           token = { type: 'repeat', value: range, greedy: true, offset: i };
+          if (is_beginning) {
+            throw new ParseError('Noting to repeat', 0, i, delta + 1);
+          }
+          if (range[0] == 0 && (range.length == 1 || range[1] == 0)) {
+            if (regex[i + delta] === '?') delta += 1;
+            let top = tokens[tokens.length - 1];
+            if (top.type == 'char' || top.type == 'range' || top.type == 'meta') {
+              i += delta;
+              tokens.pop();
+            } else if (top.type == 'group' && top.value == ')') {
+              tokens.pop();
+              let nested = 1;
+              while (nested > 0) {
+                let temp = tokens.pop();
+                if (!temp) {
+                  throw new ParseError('Unmatched ")"', 0, top.offset, 1);
+                }
+                if (temp.type == 'group') {
+                  if (temp.value == ')') ++nested;
+                  else --nested;
+                }
+              }
+            } else {
+              throw new ParseError('Unknown error when processing quantifier', 0, i, delta);
+            }
+            i += delta;
+            continue;
+          }
+          i += delta;
         } else {
           ch = '{';
         }
 
       } else if (ch == '^' || ch == '$' || ch == '\\b' || ch == '\\B') {
-        throw new ParseError('Boundary character "^", "$", "\\b" and "\\B" are not supported', 0, i);
+        is_beginning = false;
+        throw new ParseError('Boundary character "^", "$", "\\b" and "\\B" are not supported', 0, i, 1);
 
       } else if (ch == '*' || ch == '+' || ch == '?') {
-        if (ch == '?' && tokens.length && tokens[tokens.length - 1].type == 'repeat') {
+        if (ch == '?' && tokens.length > 0 && tokens[tokens.length - 1].type == 'repeat') {
           tokens[tokens.length - 1].greedy = false;
           continue;
         }
@@ -248,14 +288,21 @@ export default class Regex2NFA {
           range = [0, 1];
         }
 
+        is_beginning = false;
         token = { type: 'repeat', value: range, greedy: true, offset: i };
 
       } else if (ch == '|') {
+        is_beginning = true;
         token = { type: 'union', value: '|', offset: i };
       }
 
       if (!token) {
         token = { type: 'char', value: ch, offset: i };
+      }
+
+      if (token.type == 'range' || token.type == 'char' || token.type == 'meta') {
+        insert_concat_token(i);
+        is_beginning = false;
       }
 
       token.text = ch;
@@ -281,6 +328,7 @@ export default class Regex2NFA {
       switch (object.type) {
         case 'concat':
           if (interpret_stack_count < 2) {
+            // throw new Error('No expression to concatenate');
             return result.length;
           }
           --interpret_stack_count;
@@ -306,22 +354,17 @@ export default class Regex2NFA {
 
     let parsed_length = 0;
     let last_char = null;
-    let is_beginning = true;
     for (let token of tokens) {
       if (token.type == 'group') {
-        is_beginning = false;
-
         if (token.value == '(') {
           let top;
-          if (stack.length > 0 && (top = stack[stack.length - 1]) && (top.type == 'repeat' || top.type == 'concat')) {
+          if (stack.length > 0 && (top = stack[stack.length - 1]) && top.type == 'repeat') {
             stack.pop();
             append(top);
           }
-          append({ type: 'concat', value: '', offset: parsed_length });
 
           stack.push(token);
           last_char = null;
-          is_beginning = true;
 
         } else {
           let top;
@@ -330,7 +373,7 @@ export default class Regex2NFA {
             append(top);
           }
           if (!top) {
-            throw new ParseError('Unmatched ")"', 0, parsed_length);
+            throw new ParseError('Unmatched ")"', 0, parsed_length, 1);
           }
           last_char = ')';
         }
@@ -365,19 +408,18 @@ export default class Regex2NFA {
         last_char = null;
         stack.push(token);
 
-      } else {
+      } else if (token.type == 'concat') {
         let top;
         if (stack.length > 0 && (top = stack[stack.length - 1]) && (top.type == 'repeat' || top.type == 'concat')) {
           stack.pop();
           append(top);
         }
 
-        if (!is_beginning) {
-          stack.push({ type: 'concat', value: '', offset: parsed_length });
-        }
+        last_char = null;
+        stack.push(token);
 
+      } else {
         last_char = token;
-        is_beginning = false;
         append(token);
       }
 
@@ -387,7 +429,7 @@ export default class Regex2NFA {
     let top;
     while (top = stack.pop()) { // eslint-disable-line no-cond-assign
       if (top.type == 'group' && top.value == '(') {
-        throw new Error('Unterminated group');
+        throw new ParseError('Unterminated group', 0, top.offset, 1);
       }
       append(top);
     }
@@ -414,8 +456,12 @@ export default class Regex2NFA {
             regex = `[${token.value}]`;
           } else if (token.value == '.' && token.text == '.') {
             result = '';
+            throw new ParseError('The wildcard character "." is not supported yet', 0, token.offset, 1);
           }
           if (regex) {
+            if (regex == '[0-9]') {
+              regex = token.value = '\\d';
+            }
             result = global_regexp_cache[regex];
             if (!result) {
               result = global_regexp_cache[regex] = new RegExp(regex);
@@ -513,18 +559,21 @@ export default class Regex2NFA {
               last_entry = nfa.addState();
               nfa.addEdge(last_entry, last_entry, edges[0].getProps());
             }
+            if (token.greedy) edges[0].set('greedy', true);
             edges[0].to = last_entry;
             edges = [ nfa.addEdge(last_entry, null, epsilon_edge_props) ];
 
           } else if (a == 0) {
             for (let edge of original_edges) {
               edge.to = entry;
+              if (token.greedy) edge.set('greedy', true);
             }
 
           } else {
             const new_end_state = nfa.addState();
             for (let edge of edges) {
               edge.to = new_end_state;
+              if (token.greedy) edge.set('greedy', true);
             }
             nfa.addEdge(new_end_state, last_entry, epsilon_edge_props);
             edges = [ nfa.addEdge(new_end_state, null, epsilon_edge_props) ];
@@ -580,19 +629,27 @@ export default class Regex2NFA {
       }
     }
 
-    if (stack.length != 1) {
+    if (stack.length > 1) {
       throw new Error('Unknown Error');
+    }
+
+    if (stack.length == 0) {
+      console.warn('Empty regexp detected!'); // eslint-disable-line no-console
     }
 
     const final_state = nfa.addState({ label: this.options.final_state_symbol, terminal: true });
     if (this.options.final_state_type !== null) {
       final_state.set('type', this.options.final_state_type);
     }
-    const entry_state = stack[0].entry;
-    entry_state.set('label', this.options.initial_state_symbol);
-    nfa.set('entries', [entry_state]);
-    for (let edge of stack[0].edges) {
-      edge.to = final_state;
+    if (stack.length == 1) {
+      const entry_state = stack[0].entry;
+      entry_state.set('label', this.options.initial_state_symbol);
+      nfa.set('entries', [entry_state]);
+      for (let edge of stack[0].edges) {
+        edge.to = final_state;
+      }
+    } else {
+      nfa.set('entries', [final_state]);
     }
 
     return nfa;

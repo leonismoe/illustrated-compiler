@@ -2,7 +2,7 @@ import '../styles/lexical-analysis.css';
 
 import debounce from 'lodash/debounce';
 
-import VisualDFA from '../automata/visual-dfa';
+import VisualTokenizer from '../components/visual-tokenizer';
 import MediaControls from '../components/media-controls';
 import Resizer from '../components/resizer';
 
@@ -23,11 +23,11 @@ const initial_rule = `// identifier
 // ===============================
 // integer
 // type: literals.int
-[+\\-]?[0-9]+
+(\\+|-)?[0-9]+
 
 // float
 // type: literals.float
-[+\\-]?[0-9]*\\.[0-9]+([eE][+\\-]?[0-9]+)?
+(\\+|-)?[0-9]*\\.[0-9]+((e|E)(\\+|-)?[0-9]+)?
 
 // string (doesn't support escape sequence, e.g. "\\"")
 // "(?:(?!\\\\)["\\n]|[^\\n"])+" isn't supported yet
@@ -35,7 +35,7 @@ const initial_rule = `// identifier
 "[^"]*"
 
 
-// line comment
+// comments
 // ===============================
 // type: comment.line
 \\/\\/[^\\n]*
@@ -55,13 +55,22 @@ const initial_rule = `// identifier
 // type: delimiter.comma
 ,
 
+// type: delimiter.dot
+\\.
+
+// type: delimiter.colon
+:
+
+// type: delimiter.question-mark
+\\?
+
 // type: delimiter.bracket
 \\(
 \\)
 \\[
 \\]
-<
->
+\\{
+\\}
 
 
 // operators
@@ -72,14 +81,57 @@ const initial_rule = `// identifier
 // type: operator.minus
 -
 
-// type: operator.multiply
+// type: operator.star
 \\*
 
-// type: operator.division
+// type: operator.div
 \\/
 
-// type: operator.dot
-\\.
+// type: operator.mod
+%
+
+// type: operator.increase
+\\+\\+
+
+// type: operator.decrease
+--
+
+// type: operator.assign
+=
+
+// type: operator.bitwise.and
+&
+
+// type: operator.bitwise.or
+\\|
+
+// type: operator.bitwise.not
+~
+
+// type: operator.bitwise.xor
+\\^
+
+// type: operator.bitwise.shift
+<<
+>>
+>>>
+
+// type: operator.comparison
+>
+<
+>=
+<=
+==
+!=
+
+// type: operator.logical.and
+&&
+
+// type: operator.logical.or
+\\|\\|
+
+// type: operator.logical.not
+!
 
 
 // keywords
@@ -121,6 +173,14 @@ true
 false
 `;
 
+const initial_code = `// comment
+int main (int argc, char** argv) {
+  int a = 1, b = 2;
+  printf("%d + %d = %d\\n", a, b, a + b);
+  return 0;
+}
+`;
+
 
 // ============================================================
 // Progress Controls
@@ -149,7 +209,8 @@ RuleEditor.getSession().on('change', debounce(() => {
 function updateRules(text) {
   return Automata.update(text, 'rlg')
     .then(dfa => {
-      const vdfa = new VisualDFA(dfa, $dfa);
+      const vdfa = new VisualTokenizer(dfa, $dfa);
+      vdfa.prepare(initial_code);
     }, function(e) {});
 }
 

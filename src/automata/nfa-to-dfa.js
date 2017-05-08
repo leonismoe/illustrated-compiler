@@ -27,7 +27,7 @@ export default function NFA2DFA(object, options) {
   const entry = dfa.addVertex({ terminal: contain_terminal(terminals, nfa_states[0]) });
   dfa.set('entry', entry);
   dfa.set('nfa', object);
-  if (!options.preserve_nfa_mapping) {
+  if (options.preserve_nfa_mapping) {
     entry.set('nfa-mapping', map_to_id(nfa_states[0]));
   }
   const states = [entry];
