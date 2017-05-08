@@ -32,7 +32,7 @@ const initial_rule = `// identifier
 // string (doesn't support escape sequence, e.g. "\\"")
 // "(?:(?!\\\\)["\\n]|[^\\n"])+" isn't supported yet
 // type: literals.string
-"[^"]"
+"[^"]*"
 
 
 // line comment

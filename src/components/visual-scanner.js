@@ -5,7 +5,7 @@ export default class VisualScanner {
 
   constructor(vdfa, marker, font) {
     if (!vdfa || !(vdfa instanceof VisualDFA)) {
-      throw new Error('Object must be a DFA instance');
+      throw new Error('Object must be a VisualDFA instance');
     }
 
     this._vdfa = vdfa;
