@@ -145,6 +145,47 @@ export default class DFA extends NFA {
     return last_test.done && !last_test.error;
   }
 
+  // TODO: further optimization and better function name
+  optimize_transitions() {
+    for (let state of this._vertices) {
+      state._edges = state._edges.sort((a, b) => {
+        a = a.get('accept');
+        b = b.get('accept');
+
+        const a_is_string = typeof a == 'string';
+        const b_is_string = typeof b == 'string';
+        if (a_is_string && b_is_string) return a.localeCompare(b);
+        if (a_is_string) return -1;
+        if (b_is_string) return 1;
+
+        const a_is_regex = a instanceof RegExp;
+        const b_is_regex = b instanceof RegExp;
+        if (a_is_regex && b_is_regex) {
+          const _a = unescape(a.source);
+          const _b = b.source;
+          if (_a[0] != '\\' && _a[0] != '[') {
+            if (_b[0] != '\\' && _b[0] != '[') return _a.localeCompare(_b);
+            return -1;
+          }
+          if (_b[0] != '\\' && _b[0] != '[') return 1;
+          if (_a[0] == '\\') {
+            if (_b[0] == '\\') return _a.localeCompare(_b);
+            return -1;
+          }
+          if (_b[0] == '\\') return 1;
+          return _a.localeCompare(_b);
+        }
+
+        if (a_is_regex) return -1;
+        if (b_is_regex) return 1;
+        if (!a) return 1;
+        if (!b) return -1;
+
+        return a.toString().localeCompare(b.toString());
+      });
+    }
+  }
+
   // mount(dfa, edge)
   // mount(dfa, props, state?)
   // mount(dfa, accept, state?)

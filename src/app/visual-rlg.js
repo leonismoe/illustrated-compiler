@@ -48,9 +48,7 @@ updateAutomata(initial_text);
 Editor.setValue(initial_text, 1);
 Editor.getSession().on('change', debounce(() => {
   const text = Editor.getValue();
-  if (text) {
-    updateAutomata(text);
-  }
+  updateAutomata(text);
 }, 500));
 
 function updateAutomata(text) {

@@ -53,6 +53,7 @@ function update(text) {
     $graph_overlay.classList.remove('loading');
     $graph_overlay.classList.add('show', 'error');
     $message.innerText = e.message || 'An error occurred while processing the graph.';
+    console.log(e); // eslint-disable-line no-console
 
     throw e;
   });

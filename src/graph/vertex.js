@@ -113,9 +113,9 @@ export default class Vertex extends Base {
     while (vertex = stack.shift()) { // eslint-disable-line no-cond-assign
       if (!vertex || visited[vertex.id]) continue;
       if (condition) {
-        stack = stack.concat(vertex.outs.filter(condition).map(v => v.to));
+        stack = stack.concat(vertex.out.filter(condition).map(v => v.to));
       } else {
-        stack = stack.concat(vertex.outs.map(v => v.to));
+        stack = stack.concat(vertex.out.map(v => v.to));
       }
       result = callback(vertex, result);
       visited[vertex.id] = true;
@@ -147,9 +147,9 @@ export default class Vertex extends Base {
     while (vertex = stack.pop()) { // eslint-disable-line no-cond-assign
       if (!vertex || visited[vertex.id]) continue;
       if (condition) {
-        stack = stack.concat(vertex.outs.filter(condition).map(v => v.to));
+        stack = stack.concat(vertex.out.filter(condition).map(v => v.to));
       } else {
-        stack = stack.concat(vertex.outs.map(v => v.to));
+        stack = stack.concat(vertex.out.map(v => v.to));
       }
       result = callback(vertex, result);
       visited[vertex.id] = true;
