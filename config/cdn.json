@@ -5,6 +5,7 @@
   "libraries": {
     "normalize": "normalize.min.css",
     "font-awesome": "css/font-awesome.min.css",
+    "simple-line-icons": "css/simple-line-icons.min.css",
     "animate.css": "animate.min.css",
     "semantic-ui": {
       "css": "semantic.min.css",
