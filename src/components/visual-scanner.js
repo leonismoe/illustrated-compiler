@@ -34,6 +34,11 @@ export default class VisualScanner {
     }
   }
 
+  prev(step) {
+    this.goto(step, true);
+    this._vdfa.prev(step);
+  }
+
   next(step) {
     this.goto(step, true);
     this._vdfa.next(step);
