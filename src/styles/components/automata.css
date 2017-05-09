@@ -1,3 +1,9 @@
+@import "smooth-scrollbar/dist/smooth-scrollbar.css";
+
+[data-scrollbar] > .scroll-content {
+  will-change: transform;
+}
+
 :root {
   --sm-highlight-color: #ff8a27;
   --sm-resolve-color: #23d18b;
@@ -49,7 +55,6 @@
 
     &:last-of-type {
       fill: transparent;
-      stroke-width: 2;
     }
 
     &:first-of-type {

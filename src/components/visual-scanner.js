@@ -53,4 +53,8 @@ export default class VisualScanner {
     this._vdfa.prepare(null);
   }
 
+  resize() {
+    this._vdfa.resize();
+  }
+
 }

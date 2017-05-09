@@ -209,8 +209,9 @@ RuleEditor.getSession().on('change', debounce(() => {
 function updateRules(text) {
   return Automata.update(text, 'rlg')
     .then(dfa => {
-      const vdfa = new VisualTokenizer(dfa, $dfa);
-      vdfa.prepare(initial_code);
+      controls.setController(new VisualTokenizer(dfa, $dfa));
+      controls.getController().prepare(initial_code);
+      controls.reset();
     }, function(e) {});
 }
 
@@ -227,7 +228,8 @@ function updateRules(text) {
 function resizeEditor() {
   RuleEditor.resize();
   CodeEditor.resize();
+  controls.getController().resize();
 }
 
 new Resizer('.panel-resizer', '.panel-left', { callback: resizeEditor, relative: '.main-frame' });
-new Resizer('.panel-lexical > .resizer-wrapper', '.section-code', { relative: '.panel-lexical' });
+new Resizer('.panel-lexical > .resizer-wrapper', '.section-code', { relative: '.panel-lexical', callback: () => controls.getController().resize() });

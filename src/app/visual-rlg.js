@@ -94,8 +94,9 @@ $text.addEventListener('change', (e) => {
 // ============================================================
 function resizeEditor() {
   Editor.resize();
+  controls.getController().resize();
 }
 
 new Resizer('.panel-resizer', '.panel-left', { callback: resizeEditor, relative: '.main-frame' });
 new Resizer('.panel-left > .resizer-wrapper', '.section-text', { callback: resizeEditor, inverse: true, relative: '.panel-left' });
-new Resizer('.panel-right > .resizer-wrapper', '.section-nfa', { relative: '.panel-right' });
+new Resizer('.panel-right > .resizer-wrapper', '.section-nfa', { relative: '.panel-right', callback: () => controls.getController().resize() });
