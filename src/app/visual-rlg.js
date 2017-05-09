@@ -1,5 +1,7 @@
 import '../styles/visual-rlg.css';
 
+import '../bootstrap';
+
 import debounce from 'lodash/debounce';
 
 import VisualDFA from '../automata/visual-dfa';

@@ -1,3 +1,5 @@
+import isPlainObject from 'lodash/isPlainObject';
+
 export {
   escape as default,
   escape,
@@ -182,7 +184,7 @@ function escape(str, mode) {
         replace = translator(ch);
         if (replace) break;
 
-      } else if (translator && Object.getPrototypeOf(translator) == Object) {
+      } else if (translator && isPlainObject(translator)) {
         replace = translator[ch];
         if (replace) break;
 

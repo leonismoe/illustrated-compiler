@@ -1,5 +1,7 @@
 import '../styles/lexical-analysis.css';
 
+import '../bootstrap';
+
 import debounce from 'lodash/debounce';
 
 import VisualTokenizer from '../components/visual-tokenizer';
