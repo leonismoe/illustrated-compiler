@@ -14,9 +14,10 @@ export default class VisualTokenizer extends VisualDFA {
       $node.classList.remove('rejected', 'resolved', 'highlight');
     }
 
-    this._history = [];
+    const entry = this._dfa.entry;
+    this._history = [{ state: this._dfa.entry, edge: null, done: false, error: '', description: 'initial' }];
     this._dfa.reset();
-    this._state = this._dfa.entry;
+    this._state = entry;
 
     if (!text) {
       return;
@@ -33,6 +34,7 @@ export default class VisualTokenizer extends VisualDFA {
         if (i == last_token_offset) {
           ++i;
         }
+        last_step.token_index = tokens.length;
         const token = text.slice(last_token_offset, i);
         const type = last_step.error ? 'unknown' : last_step.state.get('type');
         if (!/^skip(?:$|\.)/.test(type)) {
@@ -41,12 +43,12 @@ export default class VisualTokenizer extends VisualDFA {
             type,
             offset: last_token_offset,
             length: i - last_token_offset,
-            errmsg: last_step.error,
           });
         }
         if (i >= len) {
           break;
         }
+        this._history.push({ state: entry, edge: null, done: false, error: '', description: 'reset' });
         last_token_offset = i;
         this._dfa.reset();
         this._state = this._dfa.entry;
@@ -55,6 +57,7 @@ export default class VisualTokenizer extends VisualDFA {
       }
     }
 
+    this._tokens = tokens;
     console.table(tokens);
   }
 

@@ -19,6 +19,7 @@
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.7.0",
     "normalize.css": "^7.0.0",
+    "smooth-scrollbar": "^7.2.10",
     "viz.js": "^1.7.1",
     "wolfy87-eventemitter": "^5.1.0"
   },
