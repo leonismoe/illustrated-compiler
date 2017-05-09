@@ -123,12 +123,17 @@ export default class VisualDFA {
     this._state = state;
   }
 
+  prev(step) {
+    const item = this._history[step + 1];
+    this.move(item, true, true);
+  }
+
   next(step) {
     const item = this._history[step];
     this.move(item, true);
   }
 
-  move(item, animate) {
+  move(item, animate, reverse) {
     const edge = item.edge;
 
     if (this._last_anim) {
@@ -155,8 +160,8 @@ export default class VisualDFA {
       return;
     }
 
-    const $from = this._node_dom_map[edge.from.id];
-    const $to   = this._node_dom_map[edge.to.id];
+    const $from = reverse ? this._node_dom_map[edge.to.id] : this._node_dom_map[edge.from.id];
+    const $to   = reverse ? this._node_dom_map[edge.from.id] : this._node_dom_map[edge.to.id];
 
     if (!animate) {
       $from.setAttribute('class', 'node');
@@ -187,7 +192,7 @@ export default class VisualDFA {
 
     this._last_anim = () => {
       let classes = 'node animate highlight';
-      if (item.done) {
+      if (item.done && !reverse) {
         classes += item.error ? ' rejected' : ' resolved';
       }
       $to.setAttribute('class', classes);

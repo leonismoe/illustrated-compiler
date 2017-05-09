@@ -90,7 +90,7 @@ export default class MediaControls {
     }
   }
 
-  goto(step, usegoto) {
+  goto(step) {
     if (!this._object) {
       if (this._timer) {
         this.clearTimer();
@@ -111,7 +111,39 @@ export default class MediaControls {
       return;
     }
 
-    if (step == 0) {
+    this._step = step;
+    this.updateUI();
+    return this._object.goto(step);
+  }
+
+  prev() {
+    if (this._step == 0) {
+      throw new RangeError('It\'s already the first step');
+    }
+
+    if (this._object.prev) {
+      --this._step;
+      this.updateUI();
+      return this._object.prev(this._step);
+    }
+    return this.goto(this._step - 1);
+  }
+
+  next() {
+    if (this._step >= this._total) {
+      throw new RangeError('It\'s already the last step');
+    }
+
+    if (this._object.next) {
+      ++this._step;
+      this.updateUI();
+      return this._object.next(this._step);
+    }
+    return this.goto(this._step + 1);
+  }
+
+  updateUI() {
+    if (this._step == 0) {
       this.$btn_beginning.classList.add('disabled');
       this.$btn_backward.classList.add('disabled');
     } else {
@@ -119,10 +151,10 @@ export default class MediaControls {
       this.$btn_backward.classList.remove('disabled');
     }
 
-    if (step == this._total) {
+    if (this._step == this._total) {
       this.$btn_forward.classList.add('disabled');
       this.$btn_end.classList.add('disabled');
-      if (step > 0) {
+      if (this._step > 0) {
         this.$btn_play.classList.add('restart');
         this.$btn_play.setAttribute('title', 'Restart');
       }
@@ -132,24 +164,7 @@ export default class MediaControls {
       this.$btn_play.classList.remove('restart');
     }
 
-    this.$progress_bar.style.width = 100 * (step / this._total) + '%';
-
-    if (!usegoto && this._object.next && step == this._step + 1) {
-      this._object.next(this._step + 1);
-    } else if (!usegoto && this._object.prev && step == this._step - 1) {
-      this._object.prev(this._step - 1);
-    } else {
-      this._object.goto(step);
-    }
-    this._step = step;
-  }
-
-  prev() {
-    return this.goto(this._step - 1);
-  }
-
-  next() {
-    return this.goto(this._step + 1);
+    this.$progress_bar.style.width = 100 * (this._step / this._total) + '%';
   }
 
   autoplay() {
