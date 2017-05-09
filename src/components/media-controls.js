@@ -6,12 +6,13 @@ export default class MediaControls {
 
   constructor(container = '.media-controls') {
     this.$container = typeof container == 'string' ? document.querySelector(container) : container;
+    this.$progress_bar = this.$container.querySelector('.progress-bar > .bar');
     this.$play_controls = this.$container.querySelector('.play-control');
     this.$buttons = this.$play_controls.querySelectorAll('a');
     [this.$btn_beginning, this.$btn_backward, this.$btn_play, this.$btn_forward, this.$btn_end] = this.$buttons;
 
     this._object = null;
-    this._speed = 1500;
+    this._speed = 1000;
     this._timer = null;
     this._step = 0;
     this._total = 0;
@@ -48,8 +49,8 @@ export default class MediaControls {
       return this.clear(allow_play_btn);
     }
 
-    this._total = this._object.getTotalSteps();
-    if (this._total > 1) {
+    this._total = this._object.getTotalSteps() - 1;
+    if (this._total >= 1) {
       this.clearTimer();
       this.$play_controls.classList.remove('disabled');
       this.$btn_play.classList.remove('disabled', 'pause', 'restart');
@@ -98,7 +99,7 @@ export default class MediaControls {
       throw new Error('Lacking controller, no visualizations can be represented.');
     }
 
-    if (!Number.isInteger(step) || step < 0 || step >= this._total) {
+    if (!Number.isInteger(step) || step < 0 || step > this._total) {
       if (this._timer) {
         this.clearTimer();
         return;
@@ -118,7 +119,7 @@ export default class MediaControls {
       this.$btn_backward.classList.remove('disabled');
     }
 
-    if (step == this._total - 1) {
+    if (step == this._total) {
       this.$btn_forward.classList.add('disabled');
       this.$btn_end.classList.add('disabled');
       if (step > 0) {
@@ -131,10 +132,12 @@ export default class MediaControls {
       this.$btn_play.classList.remove('restart');
     }
 
+    this.$progress_bar.style.width = 100 * (step / this._total) + '%';
+
     if (!usegoto && this._object.next && step == this._step + 1) {
-      this._object.next(this._step);
+      this._object.next(this._step + 1);
     } else if (!usegoto && this._object.prev && step == this._step - 1) {
-      this._object.prev(this._step);
+      this._object.prev(this._step - 1);
     } else {
       this._object.goto(step);
     }
@@ -156,7 +159,7 @@ export default class MediaControls {
     this.$btn_play.setAttribute('title', 'Pause');
     this._timer = setInterval(() => {
       this.next();
-      if (this._step == this._total - 1) {
+      if (this._step == this._total) {
         clearInterval(this._timer);
         this._timer = null;
       }
@@ -205,21 +208,21 @@ export default class MediaControls {
           this.$btn_play.setAttribute('title', 'Play');
           this.clearTimer();
         } else {
-          if (this._total > 1) {
+          if (this._total >= 1) {
             this.autoplay();
           }
         }
         break;
 
       case this.$btn_forward:
-        if (this._step < this._total - 1) {
+        if (this._step < this._total) {
           this.next();
         }
         break;
 
       case this.$btn_end:
-        if (this._step < this._total - 1) {
-          this.goto(this._total - 1);
+        if (this._step < this._total) {
+          this.goto(this._total);
         }
         break;
     }

@@ -49,7 +49,7 @@ Editor.setValue(initial_text, 1);
 Editor.getSession().on('change', debounce(() => {
   const text = Editor.getValue();
   updateAutomata(text);
-}, 500));
+}, 1000));
 
 function updateAutomata(text) {
   $text.setAttribute('disabled', 'disabled');

@@ -96,8 +96,8 @@ export default class VisualDFA {
     this._state = state;
   }
 
-  next(ostep) {
-    const item = this._history[ostep];
+  next(step) {
+    const item = this._history[step];
     this.move(item, true);
   }
 

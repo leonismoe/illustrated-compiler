@@ -204,7 +204,7 @@ RuleEditor.getSession().on('change', debounce(() => {
   if (text) {
     updateRules(text);
   }
-}, 500));
+}, 1000));
 
 function updateRules(text) {
   return Automata.update(text, 'rlg')

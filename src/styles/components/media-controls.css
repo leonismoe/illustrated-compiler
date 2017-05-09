@@ -1,5 +1,6 @@
 .footer > .media-controls {
   padding: 0 0.95rem;
+  padding-top: 3px;
   text-align: center;
   position: relative;
 
@@ -234,6 +235,28 @@
           transform: rotate(90deg) scale(0);
         }
       }
+    }
+  }
+
+  & .progress-bar {
+    right: 0;
+    background-color: #777;
+    overflow: hidden;
+
+    &,
+    & .bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 3px;
+    }
+
+    & .bar {
+      background-color: #2ebbd1;
+    }
+
+    &.animate .bar {
+      transition: width ease-out 0.1s;
     }
   }
 
