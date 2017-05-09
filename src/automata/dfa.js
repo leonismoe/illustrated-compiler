@@ -1,5 +1,7 @@
 /// <reference path="./dfa.d.ts" />
 
+import isPlainObject from 'lodash/isPlainObject';
+
 import NFA from './nfa';
 import NFA2DFA from './nfa-to-dfa';
 import { Edge } from '../graph';
@@ -200,7 +202,7 @@ export default class DFA extends NFA {
       }
 
       // mount(dfa, props, state)
-      if (edge && Object.getPrototypeOf(edge) == Object) {
+      if (edge && isPlainObject(edge)) {
         edge = new Edge(null, null, state, edge);
 
       // mount(dfa, accept, state)

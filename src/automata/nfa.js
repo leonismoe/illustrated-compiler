@@ -1,5 +1,6 @@
 /// <reference path="./nfa.d.ts" />
 
+import isPlainObject from 'lodash/isPlainObject';
 import { Graph, Edge } from '../graph';
 
 export default class NFA extends Graph {
@@ -105,7 +106,7 @@ export default class NFA extends Graph {
       }
 
       // mount(nfa, props, state)
-      if (edge && Object.getPrototypeOf(edge) == Object) {
+      if (edge && isPlainObject(edge)) {
         edge = new Edge(null, state, null, edge);
 
       // mount(nfa, accept, state)

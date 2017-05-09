@@ -6,7 +6,7 @@
 
   & > .speed-control {
     left: 0;
-    top: 0;
+    bottom: 0;
   }
 
   & .play-control,
@@ -263,7 +263,7 @@
   & > .footer-links {
     position: absolute;
     right: 0;
-    top: 0;
+    bottom: 0;
 
     & > li {
       padding: 0 0.75em;

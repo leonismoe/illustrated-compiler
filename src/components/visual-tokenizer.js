@@ -58,7 +58,6 @@ export default class VisualTokenizer extends VisualDFA {
     }
 
     this._tokens = tokens;
-    console.table(tokens);
   }
 
 }
