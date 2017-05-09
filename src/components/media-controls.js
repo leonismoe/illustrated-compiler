@@ -1,3 +1,5 @@
+let active_control, progress_bounding;
+
 export default class MediaControls {
 
   static create(container = '.media-controls') {
@@ -29,6 +31,17 @@ export default class MediaControls {
         e.preventDefault();
         this.handle(target);
       }
+    }, false);
+
+
+    const $progress = this.$container.querySelector('.progress-bar');
+    $progress.addEventListener('mousedown', (e) => {
+      if (this._total <= 0) return;
+      e.preventDefault();
+      this.pause();
+      active_control = this;
+      progress_bounding = $progress.getBoundingClientRect();
+      sync_progress(e);
     }, false);
   }
 
@@ -92,18 +105,12 @@ export default class MediaControls {
 
   goto(step) {
     if (!this._object) {
-      if (this._timer) {
-        this.clearTimer();
-        return;
-      }
+      this.pause();
       throw new Error('Lacking controller, no visualizations can be represented.');
     }
 
     if (!Number.isInteger(step) || step < 0 || step > this._total) {
-      if (this._timer) {
-        this.clearTimer();
-        return;
-      }
+      this.pause();
       throw new RangeError('Invalid step');
     }
 
@@ -181,6 +188,15 @@ export default class MediaControls {
     }, this._speed);
   }
 
+  pause() {
+    if (this._timer) {
+      this.clearTimer();
+      this.$btn_play.classList.remove('pause');
+      this.$btn_play.classList.add('play');
+      this.$btn_play.setAttribute('title', 'Play');
+    }
+  }
+
   clearTimer() {
     if (this._timer) {
       clearInterval(this._timer);
@@ -190,10 +206,7 @@ export default class MediaControls {
 
   handle(button) {
     if (button != this.$btn_play) {
-      this.clearTimer();
-      this.$btn_play.classList.remove('pause');
-      this.$btn_play.classList.add('play');
-      this.$btn_play.setAttribute('title', 'Play');
+      this.pause();
     }
 
     switch (button) {
@@ -244,3 +257,29 @@ export default class MediaControls {
   }
 
 }
+
+
+// Progress Bar Control
+// =========================================================
+const sync_progress = (e) => {
+  const percent = (e.clientX - progress_bounding.left) / progress_bounding.width;
+  const step = Math.round(percent * active_control._total);
+  if (step >= 0) {
+    active_control.goto(Math.max(step, active_control._total));
+  } else {
+    active_control.goto(0);
+  }
+};
+
+const finish_progress_dragging = () => {
+  active_control = false;
+};
+
+window.addEventListener('mousemove', (e) => {
+  if (!active_control) return;
+  e.preventDefault();
+  sync_progress(e);
+}, false);
+
+window.addEventListener('mouseup', finish_progress_dragging, false);
+window.addEventListener('blur',    finish_progress_dragging, false);

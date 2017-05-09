@@ -31,13 +31,13 @@ const markerSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://w
     let timer = setTimeout(() => {
       timer = null;
       document.body.removeChild($svg);
-      cb(true);
+      cb(false);
     }, 1000);
 
     animation.onfinish = () => {
       if (timer) clearTimeout(timer);
       document.body.removeChild($svg);
-      cb(false);
+      cb(true);
     };
 
     animation.play();
