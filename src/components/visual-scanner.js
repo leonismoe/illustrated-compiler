@@ -34,9 +34,9 @@ export default class VisualScanner {
     }
   }
 
-  next(ostep) {
-    this.goto(ostep + 1, true);
-    this._vdfa.next(ostep);
+  next(step) {
+    this.goto(step, true);
+    this._vdfa.next(step);
   }
 
   show() {

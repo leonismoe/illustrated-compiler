@@ -36,7 +36,7 @@ function update(text) {
       drawing = false;
       $graph_overlay.classList.remove('show', 'loading');
 
-      $dfa.innerHTML = svg.slice(svg.indexOf('-->', 57) + 3); // remove <?xml...
+      $dfa.innerHTML = svg.slice(svg.indexOf('-->', 57) + 3).replace('<title>DFA</title>', ''); // remove <?xml...
 
       resolve(dfa);
 
