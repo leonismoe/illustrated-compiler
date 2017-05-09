@@ -1,8 +1,8 @@
 import Scrollbar from 'smooth-scrollbar';
+import anime from 'animejs';
 // import throttle from 'lodash/throttle';
 
 import DFA from './dfa';
-import { Vertex } from '../graph';
 import injectDragScroll from '../components/smooth-drag-scroll';
 
 const markerSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -12,6 +12,61 @@ const markerSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://w
     </marker>
   </defs>
 </svg>`;
+
+(function (cb) {
+  const $svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  $svg.setAttribute('style', 'position:absolute; top:-300px; width:100px; height:2px; visibility:hidden; opacity:0; pointer-events:none');
+  document.body.appendChild($svg);
+
+  try {
+    const $path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    $path.setAttribute('d', 'M0,0L0,100');
+    $svg.appendChild($path);
+
+    const length = $path.getTotalLength();
+    $path.setAttribute('stroke-dasharray', length);
+
+    const animation = $path.animate({ strokeDashoffset: [0, length] }, { duration: 100 });
+
+    let timer = setTimeout(() => {
+      timer = null;
+      document.body.removeChild($svg);
+      cb(true);
+    }, 1000);
+
+    animation.onfinish = () => {
+      if (timer) clearTimeout(timer);
+      document.body.removeChild($svg);
+      cb(false);
+    };
+
+    animation.play();
+
+  } catch (e) {
+    document.body.removeChild($svg);
+    cb(false);
+  }
+
+})((support_svg_animation) => {
+  if (support_svg_animation) return;
+
+  (typeof SVGElement != 'undefined' ? SVGElement : Element).prototype.animate = function (properties, options) {
+    const anim_options = Object.assign({}, properties, options, {
+      targets: this,
+      autoplay: false,
+    });
+    if (typeof options.easing == 'string' && options.easing.indexOf('cubic-bezier') > -1) {
+      anim_options.easing = options.easing.split(/\(|\)|,/).slice(1, 5).map(v => parseFloat(v));
+    }
+
+    const anim = anime(anim_options);
+    anim.complete = () => {
+      if (anim.onfinish) anim.onfinish();
+    };
+
+    return anim;
+  };
+});
 
 export default class VisualDFA {
 
@@ -146,7 +201,7 @@ export default class VisualDFA {
         const $node = this._node_dom_map[this._state.id];
         $node.setAttribute('class', 'node' + (animate ? ' animate' : ''));
       }
-      if (item.done) {
+      if (item.done && !reverse) {
         const $node = this._node_dom_map[item.state.id];
         $node.setAttribute('class', 'node highlight ' + (animate ? 'animate ' : '') + (item.error ? 'rejected' : 'resolved'));
       } else {
@@ -170,35 +225,39 @@ export default class VisualDFA {
       return;
     }
 
-    const $edge = this.$container.querySelector(`[id=e${edge.id}] path`).cloneNode();
-    const length = $edge.getTotalLength();
+    const $$edge = this.$container.querySelector(`[id=e${edge.id}] path`);
+    const length = $$edge.getTotalLength();
+    const $edge = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    $edge.setAttribute('fill', 'none');
+    $edge.setAttribute('d', $$edge.getAttribute('d'));
     $edge.setAttribute('class', 'edge animate');
     $edge.setAttribute('stroke-dasharray', length);
-    $edge.setAttribute('stroke-dashoffset', length);
-    $edge.addEventListener('transitionend', () => {
-      // $to.setAttribute('class', 'node animate highlight');
-      $edge.parentNode.removeChild($edge);
-    }, false);
     this.$graph.appendChild($edge);
 
-    requestAnimationFrame(() => {
-      $from.setAttribute('class', 'node animate');
-      $edge.setAttribute('stroke-dashoffset', -length);
-    });
+    const duration = this._options.duration;
+    const animation = $edge.animate(
+      { strokeDashoffset: reverse ? [-length, length] : [length, -length] },
+      { duration, easing: 'cubic-bezier(0.5, 1, 0.5, 0)' }
+    );
+    animation.onfinish = () => {
+      $edge.parentNode.removeChild($edge);
+    };
+
+    $from.setAttribute('class', 'node animate');
+    animation.play();
 
     this._state = edge.to;
-
     this.scrollTo(edge.to, true);
 
     this._last_anim = () => {
       let classes = 'node animate highlight';
-      if (item.done && !reverse) {
+      if (item.done) {
         classes += item.error ? ' rejected' : ' resolved';
       }
       $to.setAttribute('class', classes);
       this._last_anim = null;
     };
-    this._last_timer = setTimeout(this._last_anim, this._options.duration / 2);
+    this._last_timer = setTimeout(this._last_anim, duration / 2);
   }
 
   updateSVGdefs() {

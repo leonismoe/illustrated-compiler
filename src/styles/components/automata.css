@@ -9,8 +9,6 @@
   --sm-resolve-color: #23d18b;
   --sm-reject-color: #ff4136;
   --sm-node-anim-duration: 0.4s;
-  --sm-path-anim-duration: 0.8s;
-  --sm-path-anim-easing: cubic-bezier(0.5, 1, 0.5, 0);
 }
 
 .graph text {
@@ -36,7 +34,6 @@
 .graph path.animate {
   stroke: var(--sm-highlight-color);
   stroke-width: 3;
-  transition: stroke-dashoffset var(--sm-path-anim-duration) var(--sm-path-anim-easing);
 }
 
 .graph .node ellipse {

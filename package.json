@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "ace-builds": "^1.2.6",
+    "animejs": "^2.0.2",
     "classlist-polyfill": "^1.2.0",
     "es6-promise": "^4.1.0",
     "font-awesome": "^4.7.0",
