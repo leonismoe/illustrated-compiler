@@ -1,0 +1,1 @@
+importScripts("https://cdn.bootcss.com/viz.js/1.7.1/viz.js");onmessage=function(a){a=Viz(a.data.src,a.data.options);postMessage(a)};
