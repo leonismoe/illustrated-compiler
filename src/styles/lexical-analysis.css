@@ -1,6 +1,7 @@
 @import "./common/global";
 @import "./common/layout";
 @import "./common/section";
+@import "./common/table";
 @import "./components/resizer";
 @import "./components/editor/variables";
 @import "./components/editor/error-marker";
@@ -99,4 +100,35 @@
 
 .section-tokens {
   flex: 1;
+}
+
+#tokens-table {
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  font-size: 14px;
+
+  & th {
+    text-transform: capitalize;
+  }
+
+  & th td {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  & td:not(:nth-child(4)) {
+    width: 1px;
+    white-space: nowrap;
+  }
+
+  & td:nth-child(1),
+  & td:nth-child(2) {
+    text-align: center;
+  }
+
+  & td:nth-child(4) {
+    white-space: pre;
+    font-family: var(--editor-font-family);
+  }
 }
