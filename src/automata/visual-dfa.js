@@ -1,3 +1,6 @@
+/* global EventEmitter */
+// import EventEmitter from 'wolfy87-eventemitter';
+
 import Scrollbar from 'smooth-scrollbar';
 import anime from 'animejs';
 // import throttle from 'lodash/throttle';
@@ -68,9 +71,11 @@ const markerSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://w
   };
 });
 
-export default class VisualDFA {
+export default class VisualDFA extends EventEmitter {
 
   constructor(object, container, options) {
+    super();
+
     if (!object || !(object instanceof DFA)) {
       throw new Error('Object must be a DFA instance');
     }
@@ -83,6 +88,7 @@ export default class VisualDFA {
     this._state = null;
     this._last_anim = null;
     this._last_timer = null;
+    this._autoscroll = true;
 
     this._options = Object.assign({
       duration: 800,
@@ -90,8 +96,11 @@ export default class VisualDFA {
 
     this._history = [];
 
-    this._scroll = Scrollbar.init(this.$container, { damping: 0.2 });
-    injectDragScroll(this._scroll);
+    this._scroll = Scrollbar.get(this.$container);
+    if (!this._scroll) {
+      this._scroll = Scrollbar.init(this.$container, { damping: 0.2 });
+      injectDragScroll(this._scroll);
+    }
 
     this._node_dom_map = {};
     this._node_position_map = {};
@@ -131,13 +140,9 @@ export default class VisualDFA {
       $node.setAttribute('class', 'node');
     }
 
-    this._history = [{ state: this._dfa.entry, edge: null, done: false, error: '', description: 'initial' }];
+    this._history = [{ state: this._dfa.entry, edge: null, done: false, error: '', type: 'reset', description: 'initial' }];
     this._dfa.reset();
     this._state = this._dfa.entry;
-
-    if (!str) {
-      return;
-    }
 
     let last_step = null;
     for (let i = 0, len = str.length; i <= len; ++i) {
@@ -161,6 +166,9 @@ export default class VisualDFA {
       throw new RangeError('Invalid step');
     }
 
+    this.emit('goto', step);
+    this.emit('step-change', step);
+
     const history = this._history[step];
     const state = history.state;
     if (this._state && state != this._state) {
@@ -180,11 +188,25 @@ export default class VisualDFA {
 
   prev(step) {
     const item = this._history[step + 1];
+    this.emit('prev', step);
+    this.emit('step-change', step);
+    if (item.type == 'reset') {
+      const prev = this._history[step];
+      this._node_dom_map[this._state.id].setAttribute('class', 'node animate');
+      this._node_dom_map[prev.state.id].setAttribute('class', 'node highlight animate' + (prev.done ? (prev.error ? ' rejected' : ' resolved') : ''));
+      if (this._state != prev.state) {
+        this.scrollTo(prev.state, true);
+      }
+      this._state = prev.state;
+      return;
+    }
     this.move(item, true, true);
   }
 
   next(step) {
     const item = this._history[step];
+    this.emit('next', step);
+    this.emit('step-change', step);
     this.move(item, true);
   }
 
@@ -207,7 +229,7 @@ export default class VisualDFA {
       } else {
         const $node = this._node_dom_map[item.state.id];
         $node.setAttribute('class', 'node highlight ' + (animate ? 'animate' : ''));
-        if (this._state != item.state) {
+        if (this._autoscroll && this._state != item.state) {
           this.scrollTo(item.state, animate);
         }
       }
@@ -221,7 +243,7 @@ export default class VisualDFA {
     if (!animate) {
       $from.setAttribute('class', 'node');
       $to.setAttribute('class', 'node highlight');
-      this.scrollTo(edge.to);
+      if (this._autoscroll) this.scrollTo(edge.to);
       return;
     }
 
@@ -246,8 +268,8 @@ export default class VisualDFA {
     $from.setAttribute('class', 'node animate');
     animation.play();
 
-    this._state = edge.to;
-    this.scrollTo(edge.to, true);
+    this._state = reverse ? edge.from : edge.to;
+    if (this._autoscroll) this.scrollTo(this._state, true);
 
     this._last_anim = () => {
       let classes = 'node animate highlight';
@@ -270,6 +292,7 @@ export default class VisualDFA {
     this._container_height = this.$container.clientHeight;
     this._container_half_width = Math.trunc(this._container_width / 2);
     this._container_half_height = Math.trunc(this._container_height / 2);
+    this._scroll.update();
   }
 
   scrollTo(state, animate, callback = null) {

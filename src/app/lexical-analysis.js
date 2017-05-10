@@ -194,6 +194,41 @@ const controls = new MediaControls('.media-controls');
 // DOM
 // ============================================================
 const $dfa = document.getElementById('graph-dfa');
+const $section_rule = document.querySelector('.section-rules');
+const $rule_toggle_btn = document.getElementById('rule-editor-toggle-btn');
+const $token_panel = document.getElementById('panel-tokens');
+
+
+// ============================================================
+// Initialize Lexical Analysis Visualization
+// ============================================================
+let tokens = [];
+
+CodeEditor.setValue(initial_code, 1);
+CodeEditor.getSession().on('change', debounce(() => {
+  const code = CodeEditor.getValue();
+  updateCode(code);
+}, 1000));
+
+$rule_toggle_btn.addEventListener('click', (e) => {
+  e.preventDefault();
+  $section_rule.classList.toggle('expanded');
+}, false);
+function updateCode(code) {
+  try {
+    Automata.showLoader();
+
+    const controller = controls.getController();
+    controller.prepare(code);
+    tokens = controller.getTokens();
+    controls.reset();
+
+    Automata.hideLoader();
+  } catch (e) {
+    Automata.hideLoader(e);
+    controls.clear();
+  }
+}
 
 
 // ============================================================
@@ -209,19 +244,15 @@ RuleEditor.getSession().on('change', debounce(() => {
 }, 1000));
 
 function updateRules(text) {
+  controls.clear();
   return Automata.update(text, 'rlg')
     .then(dfa => {
-      controls.setController(new VisualTokenizer(dfa, $dfa));
-      controls.getController().prepare(initial_code);
-      controls.reset();
+      const vtokenizer = new VisualTokenizer(dfa, $dfa, { editor: CodeEditor });
+      vtokenizer.on('token-change', syncTokens);
+      controls.setController(vtokenizer);
+      updateCode(CodeEditor.getValue());
     }, function(e) {});
 }
-
-
-// ============================================================
-// Initialize Lexical Analysis Visualization
-// ============================================================
-
 
 
 // ============================================================
@@ -234,4 +265,6 @@ function resizeEditor() {
 }
 
 new Resizer('.panel-resizer', '.panel-left', { callback: resizeEditor, relative: '.main-frame' });
-new Resizer('.panel-lexical > .resizer-wrapper', '.section-code', { relative: '.panel-lexical', callback: () => controls.getController().resize() });
+new Resizer('.panel-lexical > .resizer-wrapper', '.section-code', { relative: '.panel-lexical', callback: () => {
+  CodeEditor.resize();
+}});
