@@ -1,0 +1,81 @@
+table.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #fff;
+  border: 1px solid rgba(34, 36, 38, 0.15);
+
+  & th {
+    background-color: #f9fafb;
+    font-weight: bold;
+  }
+
+  & th,
+  & td {
+    border-left: 1px solid rgba(34, 36, 38, 0.1);
+
+    &:first-child {
+      border-left: none;
+    }
+  }
+
+  & thead th {
+    border-bottom: 1px solid rgba(34, 36, 38, 0.1);
+    padding: 0.5em;
+  }
+
+  & td {
+    border-top: 1px solid rgba(34, 36, 38, 0.1);
+    padding: 4px 6px;
+  }
+
+  & tr:first-child td {
+    border-top: none;
+  }
+
+  & tr.active,
+  & tr:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.95);
+  }
+
+  & tr.error,
+  & tr.unknown {
+    background-color: #fff6f6;
+    color: #9f3a38;
+
+    &.active,
+    &:hover {
+      background-color: #ffe7e7;
+      color: #943634;
+    }
+  }
+
+  & tr.warning {
+    background-color: #fffaf3;
+    color: #573a08;
+
+    &.active,
+    &:hover {
+      background-color: #fff4e4;
+      color: #493107;
+    }
+  }
+
+  & tr.success {
+    background-color: #f7ffe6;
+    color: #275b28;
+
+    &.active,
+    &:hover {
+      background-color: #f7ffe6;
+      color: #275b28;
+    }
+  }
+
+  & tr.disabled {
+    pointer-events: none;
+    color: rgba(40, 40, 40, 0.3);
+  }
+}

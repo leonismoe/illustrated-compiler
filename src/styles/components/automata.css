@@ -1,0 +1,89 @@
+@import "smooth-scrollbar/dist/smooth-scrollbar.css";
+
+[data-scrollbar] > .scroll-content {
+  will-change: transform;
+}
+
+:root {
+  --sm-highlight-color: #ff8a27;
+  --sm-resolve-color: #23d18b;
+  --sm-reject-color: #ff4136;
+  --sm-node-anim-duration: 0.4s;
+}
+
+.graph text {
+  font-family: inherit;
+}
+
+.graph .node text {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.graph .node.animate {
+  & ellipse,
+  & text {
+    transition: all var(--sm-node-anim-duration);
+  }
+}
+
+.use-arrow .edge path {
+  marker-end: url(#arrow-tail);
+}
+
+.graph path.animate {
+  stroke: var(--sm-highlight-color);
+  stroke-width: 3;
+}
+
+.graph .node ellipse {
+  fill: transparent;
+}
+
+.graph .node.highlight {
+  /**
+   * can't specify class name in DOT
+   * https://github.com/ellson/graphviz/blob/3e6b92b1d24a6deb478140f2e1410bc98e6b4d9f/plugin/core/gvrender_core_svg.c#L302
+   */
+
+  & ellipse {
+    fill: var(--sm-highlight-color);
+    stroke: var(--sm-highlight-color);
+
+    &:last-of-type {
+      fill: transparent;
+    }
+
+    &:first-of-type {
+      fill: var(--sm-highlight-color);
+    }
+  }
+
+  & text {
+    fill: #fff;
+  }
+
+  &.resolved {
+    & ellipse:first-of-type {
+      fill: var(--sm-resolve-color);
+    }
+
+    & ellipse {
+      stroke: var(--sm-resolve-color);
+    }
+
+    & text {
+      fill: #fff;
+    }
+  }
+
+  &.rejected {
+    & ellipse:first-of-type {
+      fill: var(--sm-reject-color);
+    }
+
+    & ellipse {
+      stroke: var(--sm-reject-color);
+    }
+  }
+}
