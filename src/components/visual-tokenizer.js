@@ -5,6 +5,7 @@ export default class VisualTokenizer extends VisualDFA {
   constructor(dfa, container, options) {
     super(dfa, container, options);
     this._dfa.optimize_transitions();
+    this._keywords = dfa.get('keywords');
 
     this._editor = this._options.editor && this._options.editor.markup ? this._options.editor : null;
     this.on('step-change', (step) => {
@@ -62,7 +63,7 @@ export default class VisualTokenizer extends VisualDFA {
         if (!/^skip(?:$|\.)/.test(type)) {
           tokens.push({
             token,
-            type,
+            type: this._keywords && /^identifier(?:$|\.)/.test(type) && this._keywords.hasOwnProperty(token) ? this._keywords[token] : type,
             index: tokens.length,
             offset: last_token_offset,
             length: i - last_token_offset,

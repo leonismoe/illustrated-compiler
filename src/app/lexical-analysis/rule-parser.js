@@ -64,12 +64,12 @@ parse.transform = (tokens, options) => {
   const nfa = new NFA();
   const entry = nfa.addState();
   const epsilon = nfa.get('epsilon');
-  const keywords = [];
+  const keywords = {};
   nfa.set('entries', [entry]);
 
   for (let token of tokens) {
     if (token.keyword) {
-      keywords.push(token.keyword);
+      keywords[token.keyword] = token.type;
       continue;
     }
 
@@ -96,6 +96,9 @@ parse.transform = (tokens, options) => {
   for (let state of dfa.terminals) {
     state.set('tooltip', state.get('type'));
   }
+
+  nfa.set('keywords', keywords);
+  dfa.set('keywords', keywords);
 
   return {
     keywords,
