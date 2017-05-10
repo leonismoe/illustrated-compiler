@@ -240,7 +240,7 @@
 
   & .progress-bar {
     right: 0;
-    background-color: #777;
+    background-color: rgba(255, 255, 255, 0.4);
     overflow: hidden;
 
     &,
@@ -252,7 +252,7 @@
     }
 
     & .bar {
-      background-color: #29d;
+      background-color: #f12b24;
     }
 
     &.animate .bar {
@@ -262,8 +262,15 @@
 
   & > .footer-links {
     position: absolute;
-    right: 0;
     bottom: 0;
+
+    &.left {
+      left: 0;
+    }
+
+    &.right {
+      right: 0;
+    }
 
     & > li {
       padding: 0 0.75em;

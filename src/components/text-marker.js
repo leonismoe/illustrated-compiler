@@ -17,6 +17,7 @@ export default class TextMarker {
     if (!text) return;
     const repeat = 10;
     for (let ch of text) {
+      // FIXME: known issue: width is not correct under IE and Firebox
       const width = this._context.measureText(ch.repeat(repeat)).width / repeat;
       this._width.push(width);
       this._offset.push(this._offset[this._offset.length - 1] + width);

@@ -57,12 +57,18 @@
   border-left: 1px solid #dfe2e5;
 }
 
-.editor-rules,
-.editor-code {
-  &.ace_editor {
-    font-size: 14px;
-    font-family: var(--editor-font-family);
-  }
+.editor-rules.ace_editor,
+.editor-code.ace_editor,
+.code-marker {
+  font-size: 14px;
+  font-family: var(--editor-font-family);
+}
+
+.code-marker {
+  position: absolute;
+  background-color: #c7e987;
+  min-width: 0.5em;
+  z-index: 20;
 }
 
 .section-rules,

@@ -23,10 +23,7 @@ function update(text) {
       throw new Error('Rules cannot be empty');
     }
 
-    $graph_overlay.classList.remove('error');
-    $graph_overlay.classList.add('show', 'loading');
-    $message.innerText = '';
-
+    showLoader();
     const { nfa, dfa, keywords } = RuleParser.transform(text, options);
 
     parsing = false;
@@ -34,10 +31,9 @@ function update(text) {
 
     Viz(dfa.toDOT('DFA', { noarrow: true })).then(svg => {
       drawing = false;
-      $graph_overlay.classList.remove('show', 'loading');
-
       $dfa.innerHTML = svg.slice(svg.indexOf('-->', 57) + 3).replace('<title>DFA</title>', ''); // remove <?xml...
 
+      hideLoader();
       resolve(dfa);
 
     }).catch((e) => {
@@ -50,17 +46,33 @@ function update(text) {
 
   }).catch((e) => {
     parsing = false;
-    $graph_overlay.classList.remove('loading');
-    $graph_overlay.classList.add('show', 'error');
-    $message.innerText = e.message || 'An error occurred while processing the graph.';
+    hideLoader(e || 'An error occurred while processing the graph.');
     console.log(e); // eslint-disable-line no-console
 
     throw e;
   });
 }
 
+function showLoader(message = '') {
+  $graph_overlay.classList.remove('error');
+  $graph_overlay.classList.add('show', 'loading');
+  $message.innerText = message;
+}
+
+function hideLoader(e) {
+  if (e) {
+    $graph_overlay.classList.remove('loading');
+    $graph_overlay.classList.add('show', 'error');
+    $message.innerText = e.message || e;
+  } else {
+    $graph_overlay.classList.remove('show', 'loading', 'error');
+  }
+}
+
 export default {
   update,
+  showLoader,
+  hideLoader,
 
   setConfig(config) {
     options = config;

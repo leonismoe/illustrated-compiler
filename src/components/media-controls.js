@@ -57,6 +57,13 @@ export default class MediaControls {
     this.reset(allow_play_btn);
   }
 
+  getTotalSteps() {
+    if (this._total < 0) {
+      return 0;
+    }
+    return this._total + 1;
+  }
+
   reset(allow_play_btn) {
     if (!this._object) {
       return this.clear(allow_play_btn);
@@ -264,8 +271,8 @@ export default class MediaControls {
 const sync_progress = (e) => {
   const percent = (e.clientX - progress_bounding.left) / progress_bounding.width;
   const step = Math.round(percent * active_control._total);
-  if (step >= 0) {
-    active_control.goto(Math.max(step, active_control._total));
+  if (step > 0) {
+    active_control.goto(Math.min(step, active_control._total));
   } else {
     active_control.goto(0);
   }
