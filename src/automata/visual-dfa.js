@@ -97,7 +97,10 @@ export default class VisualDFA extends EventEmitter {
     this._history = [];
 
     this._scroll = Scrollbar.get(this.$container);
-    if (!this._scroll) {
+    if (this._scroll) {
+      this._scroll.update();
+      this._scroll.setPosition(0, 0);
+    } else {
       this._scroll = Scrollbar.init(this.$container, { damping: 0.2 });
       injectDragScroll(this._scroll);
     }

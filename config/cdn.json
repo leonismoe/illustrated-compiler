@@ -3,7 +3,7 @@
   "prefix": "/{name}/{version}/",
   "default": "{name}.{ext}",
   "libraries": {
-    "normalize": "normalize.min.css",
+    "normalize.css": "normalize.min.css",
     "font-awesome": "css/font-awesome.min.css",
     "simple-line-icons": "css/simple-line-icons.min.css",
     "animate.css": "animate.min.css",
@@ -41,9 +41,14 @@
     "d3": "d3.min.js",
     "viz.js": "viz.js",
     "three.js": "three.min.js",
+    "animejs": "anime.min.js",
     "moment": "moment-with-locales.min.js",
     "clipboard.js": "clipboard.min.js",
     "require.js": "require.min.js",
+    "smooth-scrollbar": {
+      "css": "smooth-scrollbar.js",
+      "js": "smooth-scrollbar.css"
+    },
     "react": "react.min.js",
     "react-router": "react-router.min.js",
     "redux": "redux.min.js",

@@ -14,7 +14,7 @@ ExternalsPlugin.prototype.apply = function(compiler) {
 
   compiler.plugin('emit', (compilation, callback) => {
     const map = require('../externals').getResourceMap();
-    const webpackFS = compilation.compiler.outputFileSystem;
+    const webpackFS = compilation.compiler.outputFileSystem && compilation.compiler.outputFileSystem.existsSync ? compilation.compiler.outputFileSystem : fs;
 
     for (let k in compilation.entrypoints) {
       if (!compilation.entrypoints.hasOwnProperty(k)) continue;
@@ -50,8 +50,7 @@ ExternalsPlugin.prototype.apply = function(compiler) {
         }
       }
     }
-    debugger;
-    console.log(externals_modules);
+
     const imported_modules = Object.keys(externals);
     const extra_scripts = [];
     // console.log(compilation.options);

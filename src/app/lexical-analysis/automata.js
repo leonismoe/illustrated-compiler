@@ -31,7 +31,7 @@ function update(text) {
 
     Viz(dfa.toDOT('DFA', { noarrow: true })).then(svg => {
       drawing = false;
-      $dfa.innerHTML = svg.slice(svg.indexOf('-->', 57) + 3).replace('<title>DFA</title>', ''); // remove <?xml...
+      ($dfa.querySelector('.scroll-content') || $dfa).innerHTML = svg.slice(svg.indexOf('-->', 57) + 3).replace('<title>DFA</title>', ''); // remove <?xml...
 
       hideLoader();
       resolve(dfa);

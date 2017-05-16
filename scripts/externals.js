@@ -22,7 +22,7 @@ const final_url = (path, name, version, ext = '') => {
   const uri = path.replace(/\{name\}/g, name)
                   .replace(/\{version\}/g, version)
                   .replace(/\{ext\}/g, ext);
-  return url.resolve(uri);
+  return uri;
 };
 
 const cache = {

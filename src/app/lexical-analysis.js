@@ -32,10 +32,10 @@ const initial_rule = `// identifier
 // type: literals.float
 (\\+|-)?[0-9]*\\.[0-9]+((e|E)(\\+|-)?[0-9]+)?
 
-// string (doesn't support escape sequence, e.g. "\\"")
-// "(?:(?!\\\\)["\\n]|[^\\n"])+" isn't supported yet
+// double quoted string
+// use [\\s\\S] instead of "." to match everything including "\\n"
 // type: literals.string
-"[^"]*"
+"([^\\\\"]|\\\\[\\s\\S])*"
 
 
 // comments
