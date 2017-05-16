@@ -450,10 +450,8 @@ export default class Regex2NFA {
         const accept = (() => {
           let result = token.value;
           let regex = null;
-          if (result[0] == '\\') {
-            regex = result;
-          } else if (token.type == 'range') {
-            regex = `[${token.value}]`;
+          if (result[0] == '\\' && result.length > 1 || token.type == 'range') {
+            regex = token.text;
           } else if (token.value == '.' && token.text == '.') {
             result = '';
             throw new ParseError('The wildcard character "." is not supported yet', 0, token.offset, 1);
@@ -471,13 +469,15 @@ export default class Regex2NFA {
         })();
         const label = (() => {
           if (accept instanceof RegExp) {
-            if (token.value[0] == '\\') {
+            if (token.value[0] == '\\' && token.value.length == 2) {
               return this.character_class_desc(token.value);
             }
             return accept.source;
           }
           if (accept === '') {
             return 'any';
+          } else if (accept == '\\') {
+            return accept;
           }
           return escape(token.value, ['escape-sequence', 'space-open-box']);
         })();

@@ -3,5 +3,7 @@
   "font-awesome": null,
   "ace-builds/src-noconflict/ace": "ace",
   "viz.js": "Viz",
-  "wolfy87-eventemitter": "EventEmiter"
+  "wolfy87-eventemitter": "EventEmitter",
+  "animejs": "anime",
+  "smooth-scrollbar": "Scrollbar"
 }

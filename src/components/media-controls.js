@@ -189,8 +189,7 @@ export default class MediaControls {
     this._timer = setInterval(() => {
       this.next();
       if (this._step == this._total) {
-        clearInterval(this._timer);
-        this._timer = null;
+        this.pause();
       }
     }, this._speed);
   }
