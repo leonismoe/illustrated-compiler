@@ -4,9 +4,25 @@
   text-align: center;
   position: relative;
 
-  & > .speed-control {
-    left: 0;
-    bottom: 0;
+  & .speed-control {
+    position: absolute;
+    left: 50%;
+    margin-left: calc(-1 * (100px + 6px + 2.5 * 42px + 0.5 * 42px));
+
+    & .progress {
+      width: calc(100px + 6px);
+      height: 4px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-top: -3px; /* hack */
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+
+    & .bar {
+      width: 6px;
+      height: 4px;
+      background-color: #fff;
+    }
   }
 
   & .play-control,
@@ -240,27 +256,38 @@
 
   & .progress-bar {
     right: 0;
+    height: 3px;
     background-color: rgba(255, 255, 255, 0.4);
     overflow: hidden;
+    transition: height 0.1s linear;
 
     &,
     & .bar {
       position: absolute;
       top: 0;
       left: 0;
-      height: 3px;
+    }
+
+    &:hover,
+    &:active {
+      height: 5px;
     }
 
     & .bar {
+      bottom: 0;
       background-color: #f12b24;
     }
 
     &.animate .bar {
       transition: width ease-out 0.1s;
     }
+
+    &.animate:active .bar {
+      transition: none;
+    }
   }
 
-  & > .footer-links {
+  & .footer-links {
     position: absolute;
     bottom: 0;
 

@@ -47,22 +47,22 @@ export default class RLG2NFA {
       if (!lines[i]) continue; // empty line
       const parts = lines[i].split(regex_produce, 2);
       if (parts.length < 2) {
-        throw new ParseError('Unexpected EOL, expecting "define as" / "consist of" symbol', i, lines[i].length);
+        throw new ParseError('Unexpected EOL, expecting "define as" / "consist of" symbol', null, i, lines[i].length);
       }
 
       const nonterminal = parts[0].trim();
       const expressions = parts[1].replace(/[\s\uFEFF\xA0]/g, '').split('|');
       if (!nonterminal) {
-        throw new ParseError('Unexpected "define as" / "consist of" symbol, expecting rule identifier (nonterminal)', i, 0);
+        throw new ParseError('Unexpected "define as" / "consist of" symbol, expecting rule identifier (nonterminal)', null, i, 0);
       }
       if (nonterminal[0] == '<' && nonterminal[nonterminal.length - 1] != '>') {
-        throw new ParseError('Unmatched "<"', i, 0);
+        throw new ParseError('Unmatched "<"', null, i, 0);
       }
       if (nonterminal[0] != '<' && nonterminal[nonterminal.length - 1] == '>') {
-        throw new ParseError('Character ">" is not allowed here', i, nonterminal.length - 1);
+        throw new ParseError('Character ">" is not allowed here', null, i, nonterminal.length - 1);
       }
       if (!/^<?[a-zA-Z\$_\u00a1-\uffff][a-zA-Z\d\$_\u00a1-\uffff]*('|`)*(\?|\+|\*)?>?$/.test(nonterminal)) {
-        throw new ParseError('Rule identifier (nonterminal) is invalid', i, 0);
+        throw new ParseError('Rule identifier (nonterminal) is invalid', null, i, 0);
       }
 
       nonterminals.push(nonterminal);
@@ -77,7 +77,7 @@ export default class RLG2NFA {
       for (let j = 0; j < expressions.length; ++j) {
         const expr = expressions[j].trim();
         if (!expr) {
-          throw new ParseError('The expression cannot be empty', i);
+          throw new ParseError('The expression cannot be empty', null, i);
         }
         let nt_offset = -1;
         for (let nt of nonterminals) {
@@ -87,12 +87,12 @@ export default class RLG2NFA {
           }
         }
         if (nt_offset == 0) {
-          throw new ParseError('The expression should contain at least one terminal', i);
+          throw new ParseError('The expression should contain at least one terminal', null, i);
         }
         const epsilon_offset = expr.indexOf(this.options.epsilon);
         if (epsilon_offset > -1) {
           if (expr != this.options.epsilon) {
-            throw new ParseError('There should be nothing around epsilon', i);
+            throw new ParseError('There should be nothing around epsilon', null, i);
           }
         }
         const prefix = nt_offset < 0 ? expr : expr.slice(0, nt_offset).trim();

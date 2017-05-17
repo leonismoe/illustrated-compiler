@@ -8,8 +8,10 @@ export default function parse(text, options) {
   const result = [];
 
   let type = null;
+  let offset = 0;
   for (let i = 0; i < lines.length; ++i) {
     const line = lines[i].trim();
+    offset += lines[i].length;
 
     if (!line) {
       type = null;
@@ -24,7 +26,7 @@ export default function parse(text, options) {
 
     } else {
       if (!type) {
-        throw new ParseError(`Please specify the type of token matching this regular expression: ${line}`, i, 0);
+        throw new ParseError(`Please specify the type of token matching this regular expression: ${line}`, offset, i, 0);
       }
 
       if (/keyword($|\.)/.test(type)) {
