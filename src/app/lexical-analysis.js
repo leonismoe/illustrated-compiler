@@ -177,7 +177,7 @@ false
 `;
 
 const initial_code = `// comment
-int main (int argc, char** argv) {
+int main() {
   int a = 1, b = 2;
   printf("%d + %d = %d\\n", a, b, a + b);
   return 0;
@@ -279,7 +279,7 @@ RuleEditor.getSession().on('change', debounce(() => {
 
 function updateRules(text) {
   controls.clear();
-  return Automata.update(text, 'rlg')
+  return Automata.update(text)
     .then(dfa => {
       const vtokenizer = new VisualTokenizer(dfa, $dfa, { editor: CodeEditor });
       vtokenizer.on('token-change', syncTokens);

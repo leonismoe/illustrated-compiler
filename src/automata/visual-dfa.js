@@ -16,6 +16,9 @@ const markerSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://w
   </defs>
 </svg>`;
 
+const $graph_style = document.createElement('style');
+document.getElementsByTagName('head')[0].appendChild($graph_style);
+
 (function (cb) {
   const $svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   $svg.setAttribute('style', 'position:absolute; top:-300px; width:100px; height:2px; visibility:hidden; opacity:0; pointer-events:none');
@@ -105,6 +108,7 @@ export default class VisualDFA extends EventEmitter {
       injectDragScroll(this._scroll);
     }
 
+    // cache node position
     this._node_dom_map = {};
     this._node_position_map = {};
     const container_bounding = this.$container.getBoundingClientRect();
@@ -257,6 +261,7 @@ export default class VisualDFA extends EventEmitter {
     $edge.setAttribute('d', $$edge.getAttribute('d'));
     $edge.setAttribute('class', 'edge animate');
     $edge.setAttribute('stroke-dasharray', length);
+    $edge.setAttribute('stroke-dashoffset', reverse ? -length : length);
     this.$graph.appendChild($edge);
 
     const duration = this._options.duration;
@@ -298,6 +303,15 @@ export default class VisualDFA extends EventEmitter {
     this._scroll.update();
   }
 
+  getDuration() {
+    return this._options.duration;
+  }
+
+  setDuration(duration) {
+    this._options.duration = duration;
+    $graph_style.innerText = `.graph .node.animate ellipse, .graph .node.animate text { transition: all ${duration/2}ms; }`;
+  }
+
   scrollTo(state, animate, callback = null) {
     if (!state) return;
 
@@ -309,7 +323,12 @@ export default class VisualDFA extends EventEmitter {
           || bounding.y + bounding.height >= scrollOffset.y + this._container_height) {
         const x = Math.max(0, bounding.centerX - this._container_half_width);
         const y = Math.max(0, bounding.centerY - this._container_half_height);
-        this._scroll.scrollTo(x, y, animate ? this._options.duration / 2 : 0, callback);
+        if (animate) {
+          this._scroll.scrollTo(x, y, this._options.duration / 2, callback);
+        } else {
+          this._scroll.setPosition(x, y);
+          if (callback) callback();
+        }
       }
     }
   }

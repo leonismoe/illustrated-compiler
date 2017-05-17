@@ -51,7 +51,7 @@ export default class Regex2NFA {
           result = i;
           break;
         } else if (open && ch == open && !escaped) {
-          throw new ParseError(`Character "${open}" is not allowed between "${open}" and "${search}"`, 0, i, 1);
+          throw new ParseError(`Character "${open}" is not allowed between "${open}" and "${search}"`, i, 0, i, 1);
         } else {
           escaped = false;
         }
@@ -91,7 +91,7 @@ export default class Regex2NFA {
           const temp = regex.substr(i + 1, 2);
           if (hexdigit.test(temp[0])) {
             if (!hexdigit.test(temp[1])) {
-              throw new ParseError('Invalid hexadecimal escape sequence', 0, i + 2, 1);
+              throw new ParseError('Invalid hexadecimal escape sequence', i + 2, 0, i + 2, 1);
             }
             ch += temp;
             i += 2;
@@ -104,7 +104,7 @@ export default class Regex2NFA {
           if (hexdigit.test(temp[0])) {
             for (let j = 1; j < 4; ++j) {
               if (!hexdigit.test(temp[j])) {
-                throw new ParseError('Invalid Unicode escape sequence', 0, i - 1, j + 3);
+                throw new ParseError('Invalid Unicode escape sequence', i - 1, 0, i - 1, j + 3);
               }
             }
             ch += temp;
@@ -115,7 +115,7 @@ export default class Regex2NFA {
 
         } else if (/\d/.test(ch[1])) {
           if ((ch[1] | 0) >= 8) {
-            throw new ParseError('Back reference is not supported', 0, i, 1);
+            throw new ParseError('Back reference is not supported', i, 0, i, 1);
           }
 
           let temp = '';
@@ -136,7 +136,7 @@ export default class Regex2NFA {
           }
 
         } else if (ch[1] == 'b' || ch[1] == 'B') {
-          throw new ParseError('Boundary character "\\b" and "\\B" are not supported', 0, i - 1, 2);
+          throw new ParseError('Boundary character "\\b" and "\\B" are not supported', i - 1, 0, i - 1, 2);
 
         } else if ('tnvfrdDsSwW'.indexOf(ch[1]) < 0) {
           ch = ch[1];
@@ -161,12 +161,12 @@ export default class Regex2NFA {
           ++paren_count;
         }
         if (lookahead2 == '?=' || lookahead2 == '?!') {
-          throw new ParseError(`Quantifier "${lookahead2}" is not supported`, 0, i, 3);
+          throw new ParseError(`Quantifier "${lookahead2}" is not supported`, i, 0, i, 3);
         }
 
         const lookahead3 = regex.substr(i + 1, 3);
         if (lookahead3 == '?<=' || lookahead3 == '?<!') {
-          throw new ParseError('Lookbehind is not supported', 0, i, 4);
+          throw new ParseError('Lookbehind is not supported', i, 0, i, 4);
         }
 
         insert_concat_token(i);
@@ -180,10 +180,10 @@ export default class Regex2NFA {
       } else if (ch == '[') {
         const offset = search_until(']', i + 1, len);
         if (offset < 0) {
-          throw new ParseError('Expecting "]", but reached EOF', 0, len, 0);
+          throw new ParseError('Expecting "]", but reached EOF', len, 0, len, 0);
         }
         if (offset == i + 1) {
-          throw new ParseError('Expecting character list between "[" and "]", but nothing found', 0, i, 2);
+          throw new ParseError('Expecting character list between "[" and "]", but nothing found', i, 0, i, 2);
         }
         const range = regex.slice(i + 1, offset);
         ch = '[' + range + ']';
@@ -191,7 +191,7 @@ export default class Regex2NFA {
         try {
           new RegExp(ch); // throws
         } catch (e) {
-          throw new ParseError('Range out of order in character class', 0, i, offset + 1);
+          throw new ParseError('Range out of order in character class', i, 0, i, offset + 1);
         }
         i = offset;
 
@@ -221,7 +221,8 @@ export default class Regex2NFA {
 
         if (range.length == 2) {
           if (range[0] > range[1]) {
-            throw new ParseError('Numbers out of order in {} quantifier', 0, i + 2 + ('' + range[0]).length, range[1].length);
+            const offset = i + 2 + ('' + range[0]).length;
+            throw new ParseError('Numbers out of order in {} quantifier', offset, 0, offset, range[1].length);
           }
         } else if (range.length != 1 || !closed) {
           range = null;
@@ -237,7 +238,7 @@ export default class Regex2NFA {
           }
           token = { type: 'repeat', value: range, greedy: true, offset: i };
           if (is_beginning) {
-            throw new ParseError('Noting to repeat', 0, i, delta + 1);
+            throw new ParseError('Noting to repeat', i, 0, i, delta + 1);
           }
           if (range[0] == 0 && (range.length == 1 || range[1] == 0)) {
             if (regex[i + delta] === '?') delta += 1;
@@ -251,7 +252,7 @@ export default class Regex2NFA {
               while (nested > 0) {
                 let temp = tokens.pop();
                 if (!temp) {
-                  throw new ParseError('Unmatched ")"', 0, top.offset, 1);
+                  throw new ParseError('Unmatched ")"', top.offset, 0, top.offset, 1);
                 }
                 if (temp.type == 'group') {
                   if (temp.value == ')') ++nested;
@@ -259,7 +260,7 @@ export default class Regex2NFA {
                 }
               }
             } else {
-              throw new ParseError('Unknown error when processing quantifier', 0, i, delta);
+              throw new ParseError('Unknown error when processing quantifier', i, 0, i, delta);
             }
             i += delta;
             continue;
@@ -271,7 +272,7 @@ export default class Regex2NFA {
 
       } else if (ch == '^' || ch == '$' || ch == '\\b' || ch == '\\B') {
         is_beginning = false;
-        throw new ParseError('Boundary character "^", "$", "\\b" and "\\B" are not supported', 0, i, 1);
+        throw new ParseError('Boundary character "^", "$", "\\b" and "\\B" are not supported', i, 0, i, 1);
 
       } else if (ch == '*' || ch == '+' || ch == '?') {
         if (ch == '?' && tokens.length > 0 && tokens[tokens.length - 1].type == 'repeat') {
@@ -373,20 +374,20 @@ export default class Regex2NFA {
             append(top);
           }
           if (!top) {
-            throw new ParseError('Unmatched ")"', 0, parsed_length, 1);
+            throw new ParseError('Unmatched ")"', parsed_length, 0, parsed_length, 1);
           }
           last_char = ')';
         }
 
       } else if (token.type == 'repeat') {
         if (!last_char) {
-          throw new ParseError('Nothing to repeat', 0, parsed_length);
+          throw new ParseError('Nothing to repeat', parsed_length, 0, parsed_length);
         }
 
         const range = token.value;
         const max_finite_repeat = range.length == 2 && range[1] != Infinity ? range[1] : range[0];
         if (max_finite_repeat > this.options.max_repeat_count || last_char == ')' && max_finite_repeat > this.options.max_repeat_group) {
-          throw new ParseError('Repeat too more', 0, parsed_length);
+          throw new ParseError('Repeat too more', parsed_length, 0, parsed_length);
         }
 
         let top;
@@ -429,7 +430,7 @@ export default class Regex2NFA {
     let top;
     while (top = stack.pop()) { // eslint-disable-line no-cond-assign
       if (top.type == 'group' && top.value == '(') {
-        throw new ParseError('Unterminated group', 0, top.offset, 1);
+        throw new ParseError('Unterminated group', top.offset, 0, top.offset, 1);
       }
       append(top);
     }
@@ -454,7 +455,7 @@ export default class Regex2NFA {
             regex = token.text;
           } else if (token.value == '.' && token.text == '.') {
             result = '';
-            throw new ParseError('The wildcard character "." is not supported yet', 0, token.offset, 1);
+            throw new ParseError('The wildcard character "." is not supported yet', token.offset, 0, token.offset, 1);
           }
           if (regex) {
             if (regex == '[0-9]') {

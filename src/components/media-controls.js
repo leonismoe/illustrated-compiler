@@ -1,4 +1,4 @@
-let active_control, progress_bounding;
+let active_control, active_control_type, active_bar, progress_bounding, bar_bouding;
 
 export default class MediaControls {
 
@@ -6,15 +6,15 @@ export default class MediaControls {
     return new MediaControls(container);
   }
 
-  constructor(container = '.media-controls') {
+  constructor(container = '.media-controls', options) {
     this.$container = typeof container == 'string' ? document.querySelector(container) : container;
     this.$progress_bar = this.$container.querySelector('.progress-bar > .bar');
     this.$play_controls = this.$container.querySelector('.play-control');
     this.$buttons = this.$play_controls.querySelectorAll('a');
     [this.$btn_beginning, this.$btn_backward, this.$btn_play, this.$btn_forward, this.$btn_end] = this.$buttons;
 
+    this._options = Object.assign({}, MediaControls.defaults, options);
     this._object = null;
-    this._speed = 1000;
     this._timer = null;
     this._step = 0;
     this._total = 0;
@@ -34,15 +34,32 @@ export default class MediaControls {
     }, false);
 
 
+    // initialize progress control
     const $progress = this.$container.querySelector('.progress-bar');
     $progress.addEventListener('mousedown', (e) => {
       if (this._total <= 0) return;
       e.preventDefault();
       this.pause();
       active_control = this;
+      active_control_type = 'progress';
       progress_bounding = $progress.getBoundingClientRect();
       sync_progress(e);
     }, false);
+
+    // initialize speed control
+    const $speed = this.$speed = this.$container.querySelector('.speed-control .progress');
+    const $speedbar = this.$speedbar = $speed.querySelector('.bar');
+    $speed.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      active_control = this;
+      active_control_type = 'speed';
+      active_bar = $speedbar;
+      progress_bounding = $speed.getBoundingClientRect();
+      bar_bouding = $speedbar.getBoundingClientRect();
+      update_speed(e);
+    }, false);
+
+    this.setDuration(this._options.duration);
   }
 
   getController() {
@@ -54,6 +71,9 @@ export default class MediaControls {
       this._object.destruct(this._step);
     }
     this._object = object;
+    if (this._object && this._object.setDuration) {
+      this._object.setDuration(this._duration);
+    }
     this.reset(allow_play_btn);
   }
 
@@ -191,7 +211,7 @@ export default class MediaControls {
       if (this._step == this._total) {
         this.pause();
       }
-    }, this._speed);
+    }, this._duration);
   }
 
   pause() {
@@ -207,6 +227,37 @@ export default class MediaControls {
     if (this._timer) {
       clearInterval(this._timer);
       this._timer = null;
+    }
+  }
+
+  getDuration() {
+    return this._duration;
+  }
+
+  setDuration(duration, { dont_update_bar } = {}) {
+    const [min_duration, max_duration] = this._options.duration_range;
+    if (duration >= 0 && duration <= 1) {
+      duration = min_duration + (max_duration - min_duration) * duration;
+    } else if (duration < min_duration) {
+      duration = min_duration;
+    } else if (duration > max_duration) {
+      duration = max_duration;
+    }
+
+    this._duration = duration;
+    if (this._object && this._object.setDuration) {
+      this._object.setDuration(duration);
+    }
+
+    if (this._timer) {
+      this.autoplay();
+    }
+
+    if (!dont_update_bar) {
+      const speed_bounding = this.$speed.getBoundingClientRect();
+      const bar_bouding = this.$speedbar.getBoundingClientRect();
+      const ratio = (duration - min_duration) / (max_duration - min_duration);
+      this.$speedbar.style.marginLeft = ratio * (speed_bounding.width - bar_bouding.width) + 'px';
     }
   }
 
@@ -265,6 +316,12 @@ export default class MediaControls {
 }
 
 
+MediaControls.defaults = {
+  duration: 800,
+  duration_range: [200, 2000],
+};
+
+
 // Progress Bar Control
 // =========================================================
 const sync_progress = (e) => {
@@ -277,14 +334,28 @@ const sync_progress = (e) => {
   }
 };
 
+const update_speed = (e) => {
+  const x = e.clientX - bar_bouding.width / 2;
+  const max_offset = progress_bounding.width - bar_bouding.width;
+  const offset = x <= progress_bounding.left ? 0 : Math.min(x - progress_bounding.left, max_offset);
+  const ratio = offset / max_offset;
+  active_bar.style.marginLeft = offset + 'px';
+  active_control.setDuration(ratio, { dont_update_bar: true });
+};
+
 const finish_progress_dragging = () => {
   active_control = false;
+  active_bar = null;
 };
 
 window.addEventListener('mousemove', (e) => {
   if (!active_control) return;
   e.preventDefault();
-  sync_progress(e);
+  if (active_control_type == 'progress') {
+    sync_progress(e);
+  } else if (active_control_type == 'speed') {
+    update_speed(e);
+  }
 }, false);
 
 window.addEventListener('mouseup', finish_progress_dragging, false);
