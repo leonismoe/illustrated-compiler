@@ -1,6 +1,6 @@
 /// <reference path="./nfa.d.ts" />
 
-import isPlainObject from 'lodash/isPlainObject';
+import { isPlainObject } from 'is-plain-object';
 import { Graph, Edge } from '../graph';
 
 export default class NFA extends Graph {

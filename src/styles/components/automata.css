@@ -1,5 +1,3 @@
-@import "smooth-scrollbar/dist/smooth-scrollbar.css";
-
 [data-scrollbar] > .scroll-content {
   will-change: transform;
 }

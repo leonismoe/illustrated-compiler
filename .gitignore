@@ -4,5 +4,4 @@ node_modules
 .tmp
 .vscode
 
-.npmrc
 *.log

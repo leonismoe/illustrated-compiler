@@ -14,7 +14,7 @@
     background-color: #2684ff;
   }
 
-  @nest .resizer-wrapper.vertical > &,
+  .resizer-wrapper.vertical > &,
   &.vertical {
     height: 100%;
     width: 8px;
@@ -29,7 +29,7 @@
     }
   }
 
-  @nest .resizer-wrapper.horizontal > &,
+  .resizer-wrapper.horizontal > &,
   &.horizontal {
     width: 100%;
     height: 8px;

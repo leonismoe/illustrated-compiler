@@ -1,28 +1,33 @@
-import ace from '../../components/ace';
-const Range = ace.require('ace/range').Range;
+import { editor as monacoEditor, Range } from '../../components/monaco';
 
-const $container = document.getElementById('editor-code');
-const editor = ace.edit($container);
+export function createCodeEditor() {
+  const container = document.getElementById('editor-code');
+  const editor = monacoEditor.create(container, {
+    automaticLayout: true,
+    renderWhitespace: 'all',
+    renderControlCharacters: true,
+    renderLineHighlightOnlyWhenFocus: true,
+  });
 
-editor.setShowInvisibles(true);
-ace.auto_hide_cursor(editor);
+  const collection = editor.createDecorationsCollection();
 
-let current_marker;
-editor.markup = (startRow, startColumn, endRow, endColumn) => {
-  const session = editor.getSession();
-  if (current_marker) {
-    session.removeMarker(current_marker);
+  function markup(startRow, startCol, endRow, endCol) {
+    collection.set([
+      {
+        range: new Range(startRow + 1, startCol + 1, endRow + 1, endCol + 1),
+        options: {
+          className: 'code-marker',
+        },
+      },
+    ]);
   }
 
-  const range = new Range(startRow, startColumn, endRow, endColumn);
-  current_marker = session.addMarker(range, 'code-marker', 'character', false);
-};
-
-editor.cancelMarkup = () => {
-  if (current_marker) {
-    editor.getSession().removeMarker(current_marker);
-    current_marker = null;
+  function clearMarkup() {
+    collection.clear();
   }
-};
 
-export default editor;
+  editor.markup = markup;
+  editor.cancelMarkup = clearMarkup;
+
+  return { editor, markup, clearMarkup };
+}

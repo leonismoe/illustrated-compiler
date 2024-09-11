@@ -4,9 +4,6 @@
   <meta charset="utf-8"/>
   <title>App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">
-  <!-- inject external styles -->
-  <link rel="stylesheet" type="text/css" href="/assets/app.bundle.css">
 </head>
 <body>
   <div class="container">
@@ -19,9 +16,6 @@
       <div class="dfa-container top-right-label use-arrow" data-title="DFA"></div>
     </div>
   </div>
-  <!-- inject external scripts -->
-  <script src="node_modules/codemirror/mode/ebnf/ebnf.js"></script>
-  <script src="node_modules/codemirror/addon/mode/multiplex.js"></script>
-  <script type="text/javascript" src="/assets/app.bundle.js"></script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

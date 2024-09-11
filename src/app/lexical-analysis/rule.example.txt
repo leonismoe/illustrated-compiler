@@ -1,0 +1,158 @@
+# identifier
+# ===============================
+# type: identifier
+[a-zA-Z_$][0-9a-zA-Z_$]*
+
+
+# literals
+# ===============================
+# integer
+# type: literals.int
+(\+|-)?[0-9]+
+
+# float
+# type: literals.float
+(\+|-)?[0-9]*\.[0-9]+((e|E)(\+|-)?[0-9]+)?
+
+# double quoted string
+# use [\s\S] instead of "." to match everything including "\n"
+# type: literals.string
+"([^\\"]|\\[\s\S])*"
+
+
+# comments
+# ===============================
+# type: comment.line
+\/\/[^\n]*
+
+
+# whitespace (include line break)
+# ===============================
+# type: skip.whitespace
+\s+
+
+
+# delimiters
+# ===============================
+# type: delimiter.semicolon
+;
+
+# type: delimiter.comma
+,
+
+# type: delimiter.dot
+\.
+
+# type: delimiter.colon
+:
+
+# type: delimiter.question-mark
+\?
+
+# type: delimiter.bracket
+\(
+\)
+\[
+\]
+\{
+\}
+
+
+# operators
+# ===============================
+# type: operator.plus
+\+
+
+# type: operator.minus
+-
+
+# type: operator.star
+\*
+
+# type: operator.div
+\/
+
+# type: operator.mod
+%
+
+# type: operator.increase
+\+\+
+
+# type: operator.decrease
+--
+
+# type: operator.assign
+=
+
+# type: operator.bitwise.and
+&
+
+# type: operator.bitwise.or
+\|
+
+# type: operator.bitwise.not
+~
+
+# type: operator.bitwise.xor
+\^
+
+# type: operator.bitwise.shift
+<<
+>>
+>>>
+
+# type: operator.comparison
+>
+<
+>=
+<=
+==
+!=
+
+# type: operator.logical.and
+&&
+
+# type: operator.logical.or
+\|\|
+
+# type: operator.logical.not
+!
+
+
+# keywords
+# ===============================
+# type: keyword
+if
+else
+for
+while
+do
+break
+continue
+new
+delete
+return
+try
+catch
+finally
+
+# type: keyword.storage.type
+const
+let
+var
+auto
+long
+int
+short
+byte
+float
+double
+char
+unsigned
+
+# type: keyword.constant.language
+null
+
+# type: keyword.constant.language.boolean
+true
+false

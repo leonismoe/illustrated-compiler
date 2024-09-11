@@ -1,11 +1,19 @@
 /* eslint-env worker */
-/* global Viz */
 
-// TODO: rewrite externals plugin to provide flexible configuration
-importScripts('/node_modules/viz.js/viz.js');
-// import Viz from 'viz.js';
+import { instance } from '@viz-js/viz';
+
+/** @type {Awaited<ReturnType<typeof instance>>} */
+let viz;
+
+instance().then(instance => {
+  viz = instance;
+  postMessage({ ready: true });
+});
 
 onmessage = function (e) {
-  const result = Viz(e.data.src, e.data.options);
-  postMessage(result);
+  if (viz) {
+    const result = viz.render(e.data.src, e.data.options);
+    result.id = e.data.id;
+    postMessage(result);
+  }
 };

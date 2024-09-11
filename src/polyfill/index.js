@@ -16,3 +16,5 @@ import './object/assign';
 import 'es6-promise/auto';
 import 'classlist-polyfill';
 // import 'web-animations-js';
+
+import './promise/width-resolvers';

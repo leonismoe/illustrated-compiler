@@ -16,7 +16,7 @@
 
 .panel-left {
   position: relative;
-  width: 415px;
+  width: 450px;
   border-right: 1px solid #dfe2e5;
 }
 
@@ -66,10 +66,8 @@
 }
 
 .code-marker {
-  position: absolute;
   background-color: #c7e987;
   min-width: 0.5em;
-  z-index: 20;
 }
 
 .section-rules,

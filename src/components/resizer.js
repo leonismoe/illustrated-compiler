@@ -1,4 +1,4 @@
-import throttle from 'lodash/throttle';
+import throttle from 'throttleit';
 
 // https://css-tricks.com/debouncing-throttling-explained-examples/
 // https://www.html5rocks.com/en/tutorials/speed/animations/

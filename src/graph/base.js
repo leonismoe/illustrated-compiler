@@ -1,7 +1,4 @@
-/* global EventEmitter */
-
-// Note: DI (Dependency Injection) may be the better solution
-// import EventEmitter from 'wolfy87-eventemitter';
+import EventEmitter from 'wolfy87-eventemitter';
 
 export default class Base extends EventEmitter {
 

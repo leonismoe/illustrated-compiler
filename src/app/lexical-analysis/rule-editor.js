@@ -1,12 +1,20 @@
-import ace from '../../components/ace';
-import './ace-regex-syntax';
+import { editor as monacoEditor, getHighlighterAsync, THEME_ID } from '../../components/monaco';
+import { LANG_ID } from './syntax';
+import ExampleRule from './rule.example.txt?raw';
 
-const $container = document.getElementById('editor-rules');
-const editor = ace.edit($container);
+export function createRuleEditor() {
+  const container = document.getElementById('editor-rules');
 
-editor.setTheme('ace/theme/regex');
-editor.getSession().setMode('ace/mode/regex-with-comment');
+  const editor = monacoEditor.create(container, {
+    value: ExampleRule,
+    language: LANG_ID,
+    theme: THEME_ID,
+    automaticLayout: true,
+  });
 
-ace.auto_hide_cursor(editor);
+  return editor;
+}
 
-export default editor;
+export function createRuleEditorAsync() {
+  return getHighlighterAsync().then(createRuleEditor);
+}

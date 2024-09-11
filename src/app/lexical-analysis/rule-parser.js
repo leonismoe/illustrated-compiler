@@ -18,8 +18,8 @@ export default function parse(text, options) {
       continue;
     }
 
-    if (line.slice(0, 2) == '//') {
-      const content = line.slice(2).trim();
+    if (line.slice(0, 1) == '#') {
+      const content = line.slice(1).trim();
       if (content.slice(0, 5) === 'type:') {
         type = content.slice(5).trim();
       }

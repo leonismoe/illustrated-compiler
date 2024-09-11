@@ -1,9 +1,7 @@
-/* global EventEmitter */
-// import EventEmitter from 'wolfy87-eventemitter';
-
+import EventEmitter from 'wolfy87-eventemitter';
 import Scrollbar from 'smooth-scrollbar';
 import anime from 'animejs';
-// import throttle from 'lodash/throttle';
+// import throttle from 'throttleit';
 
 import DFA from './dfa';
 import injectDragScroll from '../components/smooth-drag-scroll';
@@ -36,13 +34,17 @@ document.getElementsByTagName('head')[0].appendChild($graph_style);
 
     let timer = setTimeout(() => {
       timer = null;
-      document.body.removeChild($svg);
+      if ($svg.parentElement) {
+        $svg.parentElement.removeChild($svg);
+      }
       cb(false);
     }, 1000);
 
     animation.onfinish = () => {
       if (timer) clearTimeout(timer);
-      document.body.removeChild($svg);
+      if ($svg.parentElement) {
+        $svg.parentElement.removeChild($svg);
+      }
       cb(true);
     };
 
@@ -152,14 +154,16 @@ export default class VisualDFA extends EventEmitter {
     this._state = this._dfa.entry;
 
     let last_step = null;
-    for (let i = 0, len = str.length; i <= len; ++i) {
-      last_step = this._dfa.next(str[i]);
-      this._history.push(last_step);
-      if (last_step.done) {
-        if (fullmatch && !last_step.error && i < len) {
-          last_step.error = 'State machine finished matching before reaching EOF.';
+    if (str) {
+      for (let i = 0, len = str.length; i <= len; ++i) {
+        last_step = this._dfa.next(str[i]);
+        this._history.push(last_step);
+        if (last_step.done) {
+          if (fullmatch && !last_step.error && i < len) {
+            last_step.error = 'State machine finished matching before reaching EOF.';
+          }
+          break;
         }
-        break;
       }
     }
   }
@@ -324,7 +328,9 @@ export default class VisualDFA extends EventEmitter {
         const x = Math.max(0, bounding.centerX - this._container_half_width);
         const y = Math.max(0, bounding.centerY - this._container_half_height);
         if (animate) {
-          this._scroll.scrollTo(x, y, this._options.duration / 2, callback);
+          this._scroll.scrollTo(x, y, this._options.duration / 2, {
+            callback,
+          });
         } else {
           this._scroll.setPosition(x, y);
           if (callback) callback();

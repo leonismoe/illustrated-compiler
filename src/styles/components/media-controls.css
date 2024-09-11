@@ -215,12 +215,12 @@
 
       &:hover .icon::before,
       &:hover .icon::after {
-        background-color: color(#1b1c1d whiteness(+10%));
+        background-color: color-mix(in srgb, #1b1c1d, white 10%);
       }
 
       &:active .icon::before,
       &:active .icon::after {
-        background-color: color(#1b1c1d whiteness(+15%));
+        background-color: color-mix(in srgb, #1b1c1d, white 15%);
       }
 
       &.anim-restart {

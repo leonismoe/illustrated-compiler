@@ -1,2 +1,2 @@
 Visualization of compiler's front part.  
-Still under construction.
+No longer maintained.

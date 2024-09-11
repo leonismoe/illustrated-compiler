@@ -1,6 +1,6 @@
 /// <reference path="./dfa.d.ts" />
 
-import isPlainObject from 'lodash/isPlainObject';
+import { isPlainObject } from 'is-plain-object';
 
 import NFA from './nfa';
 import NFA2DFA from './nfa-to-dfa';
